@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { 
   ChevronDown, 
@@ -259,7 +258,6 @@ export const PillarHierarchy = ({ pillarsData }: PillarHierarchyProps) => {
                                           <CollapsibleContent>
                                             <CardContent className="pt-0 pb-2">
                                               <div className="ml-4 space-y-3">
-                                                {/* Habits */}
                                                 {goal.habits.length > 0 && (
                                                   <div>
                                                     <h6 className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
@@ -289,7 +287,6 @@ export const PillarHierarchy = ({ pillarsData }: PillarHierarchyProps) => {
                                                   </div>
                                                 )}
 
-                                                {/* Projects */}
                                                 {goal.projects.length > 0 && (
                                                   <div>
                                                     <h6 className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
