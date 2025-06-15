@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -53,7 +52,6 @@ export const Pillars = () => {
             .eq('pillar_id', pillar.id);
 
           // Get values connected to these goals
-          const goalIds = goals?.map(g => g.id) || [];
           const { data: values } = await supabase
             .from('values_vault')
             .select('*')
@@ -61,7 +59,9 @@ export const Pillars = () => {
 
           // Create a map of values with their connected goals
           const valuesWithGoals = values?.map(value => ({
-            ...value,
+            id: value.id,
+            title: value.value, // Map 'value' field to 'title'
+            description: value.description,
             goals: goals?.filter(goal => {
               // For now, we'll show all goals under each value
               // In a real app, you might want a direct value-goal relationship
