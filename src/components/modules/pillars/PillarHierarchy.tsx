@@ -214,163 +214,164 @@ export const PillarHierarchy = ({ pillarsData }: PillarHierarchyProps) => {
                                   )}
                                 </div>
                               </div>
-                            </CollapsibleTrigger>
+                            </CardHeader>
+                          </CollapsibleTrigger>
 
-                            <CollapsibleContent>
-                              <CardContent className="pt-0 pb-3">
-                                {value.goals.length === 0 ? (
-                                  <div className="text-center py-4 text-muted-foreground text-sm">
-                                    <Target className="h-6 w-6 mx-auto mb-1 opacity-50" />
-                                    <p>No goals set for this value yet.</p>
-                                  </div>
-                                ) : (
-                                  <div className="space-y-2 ml-4">
-                                    {value.goals.map((goal) => (
-                                      <Card key={goal.id} className="border-l-4 border-l-green-200">
-                                        <Collapsible 
-                                          open={expandedGoals.has(goal.id)} 
-                                          onOpenChange={() => toggleGoal(goal.id)}
-                                        >
-                                          <CollapsibleTrigger asChild>
-                                            <CardHeader className="cursor-pointer hover:bg-muted/25 transition-colors py-2">
-                                              <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-2">
-                                                  <Target className="h-3 w-3 text-green-600" />
-                                                  <span className="text-sm font-medium">{goal.title}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                  <Badge className={getStatusColor(goal.status)}>
-                                                    {goal.status}
-                                                  </Badge>
-                                                  <Badge variant="outline">
-                                                    {goal.habits.length + goal.projects.length} items
-                                                  </Badge>
-                                                  {expandedGoals.has(goal.id) ? (
-                                                    <ChevronDown className="h-3 w-3" />
-                                                  ) : (
-                                                    <ChevronRight className="h-3 w-3" />
-                                                  )}
-                                                </div>
+                          <CollapsibleContent>
+                            <CardContent className="pt-0 pb-3">
+                              {value.goals.length === 0 ? (
+                                <div className="text-center py-4 text-muted-foreground text-sm">
+                                  <Target className="h-6 w-6 mx-auto mb-1 opacity-50" />
+                                  <p>No goals set for this value yet.</p>
+                                </div>
+                              ) : (
+                                <div className="space-y-2 ml-4">
+                                  {value.goals.map((goal) => (
+                                    <Card key={goal.id} className="border-l-4 border-l-green-200">
+                                      <Collapsible 
+                                        open={expandedGoals.has(goal.id)} 
+                                        onOpenChange={() => toggleGoal(goal.id)}
+                                      >
+                                        <CollapsibleTrigger asChild>
+                                          <CardHeader className="cursor-pointer hover:bg-muted/25 transition-colors py-2">
+                                            <div className="flex items-center justify-between">
+                                              <div className="flex items-center gap-2">
+                                                <Target className="h-3 w-3 text-green-600" />
+                                                <span className="text-sm font-medium">{goal.title}</span>
                                               </div>
-                                            </CardHeader>
-                                          </CollapsibleTrigger>
+                                              <div className="flex items-center gap-2">
+                                                <Badge className={getStatusColor(goal.status)}>
+                                                  {goal.status}
+                                                </Badge>
+                                                <Badge variant="outline">
+                                                  {goal.habits.length + goal.projects.length} items
+                                                </Badge>
+                                                {expandedGoals.has(goal.id) ? (
+                                                  <ChevronDown className="h-3 w-3" />
+                                                ) : (
+                                                  <ChevronRight className="h-3 w-3" />
+                                                )}
+                                              </div>
+                                            </div>
+                                          </CardHeader>
+                                        </CollapsibleTrigger>
 
-                                          <CollapsibleContent>
-                                            <CardContent className="pt-0 pb-2">
-                                              <div className="ml-4 space-y-3">
-                                                {goal.habits.length > 0 && (
-                                                  <div>
-                                                    <h6 className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
-                                                      <Clock className="h-3 w-3" />
-                                                      HABITS
-                                                    </h6>
-                                                    <div className="space-y-1">
-                                                      {goal.habits.map((habit) => (
-                                                        <div key={habit.id} className="flex items-center justify-between text-xs p-2 bg-muted/30 rounded">
-                                                          <div className="flex items-center gap-2">
-                                                            <Circle className="h-2 w-2 fill-current text-orange-500" />
-                                                            <span>{habit.title}</span>
-                                                          </div>
-                                                          <div className="flex gap-1">
-                                                            <Badge className={getStatusColor(habit.status)}>
-                                                              {habit.status}
-                                                            </Badge>
-                                                            {habit.frequency && (
-                                                              <Badge className="bg-orange-100 text-orange-800">
-                                                                {habit.frequency}
-                                                              </Badge>
-                                                            )}
-                                                          </div>
+                                        <CollapsibleContent>
+                                          <CardContent className="pt-0 pb-2">
+                                            <div className="ml-4 space-y-3">
+                                              {goal.habits.length > 0 && (
+                                                <div>
+                                                  <h6 className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
+                                                    <Clock className="h-3 w-3" />
+                                                    HABITS
+                                                  </h6>
+                                                  <div className="space-y-1">
+                                                    {goal.habits.map((habit) => (
+                                                      <div key={habit.id} className="flex items-center justify-between text-xs p-2 bg-muted/30 rounded">
+                                                        <div className="flex items-center gap-2">
+                                                          <Circle className="h-2 w-2 fill-current text-orange-500" />
+                                                          <span>{habit.title}</span>
                                                         </div>
-                                                      ))}
-                                                    </div>
+                                                        <div className="flex gap-1">
+                                                          <Badge className={getStatusColor(habit.status)}>
+                                                            {habit.status}
+                                                          </Badge>
+                                                          {habit.frequency && (
+                                                            <Badge className="bg-orange-100 text-orange-800">
+                                                              {habit.frequency}
+                                                            </Badge>
+                                                          )}
+                                                        </div>
+                                                      </div>
+                                                    ))}
                                                   </div>
-                                                )}
+                                                </div>
+                                              )}
 
-                                                {goal.projects.length > 0 && (
-                                                  <div>
-                                                    <h6 className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
-                                                      <FolderOpen className="h-3 w-3" />
-                                                      PROJECTS
-                                                    </h6>
-                                                    <div className="space-y-2">
-                                                      {goal.projects.map((project) => (
-                                                        <Card key={project.id} className="border-l-4 border-l-purple-200">
-                                                          <Collapsible 
-                                                            open={expandedProjects.has(project.id)} 
-                                                            onOpenChange={() => toggleProject(project.id)}
-                                                          >
-                                                            <CollapsibleTrigger asChild>
-                                                              <CardHeader className="cursor-pointer hover:bg-muted/25 transition-colors py-1">
-                                                                <div className="flex items-center justify-between">
-                                                                  <div className="flex items-center gap-2">
-                                                                    <FolderOpen className="h-3 w-3 text-purple-600" />
-                                                                    <span className="text-xs font-medium">{project.title}</span>
-                                                                  </div>
-                                                                  <div className="flex items-center gap-1">
-                                                                    <Badge className={getStatusColor(project.status)}>
-                                                                      {project.status}
-                                                                    </Badge>
-                                                                    <Badge className="bg-purple-100 text-purple-800">
-                                                                      {project.tasks.length} tasks
-                                                                    </Badge>
-                                                                    {expandedProjects.has(project.id) ? (
-                                                                      <ChevronDown className="h-2 w-2" />
-                                                                    ) : (
-                                                                      <ChevronRight className="h-2 w-2" />
-                                                                    )}
-                                                                  </div>
+                                              {goal.projects.length > 0 && (
+                                                <div>
+                                                  <h6 className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
+                                                    <FolderOpen className="h-3 w-3" />
+                                                    PROJECTS
+                                                  </h6>
+                                                  <div className="space-y-2">
+                                                    {goal.projects.map((project) => (
+                                                      <Card key={project.id} className="border-l-4 border-l-purple-200">
+                                                        <Collapsible 
+                                                          open={expandedProjects.has(project.id)} 
+                                                          onOpenChange={() => toggleProject(project.id)}
+                                                        >
+                                                          <CollapsibleTrigger asChild>
+                                                            <CardHeader className="cursor-pointer hover:bg-muted/25 transition-colors py-1">
+                                                              <div className="flex items-center justify-between">
+                                                                <div className="flex items-center gap-2">
+                                                                  <FolderOpen className="h-3 w-3 text-purple-600" />
+                                                                  <span className="text-xs font-medium">{project.title}</span>
                                                                 </div>
-                                                              </CardHeader>
-                                                            </CollapsibleTrigger>
+                                                                <div className="flex items-center gap-1">
+                                                                  <Badge className={getStatusColor(project.status)}>
+                                                                    {project.status}
+                                                                  </Badge>
+                                                                  <Badge className="bg-purple-100 text-purple-800">
+                                                                    {project.tasks.length} tasks
+                                                                  </Badge>
+                                                                  {expandedProjects.has(project.id) ? (
+                                                                    <ChevronDown className="h-2 w-2" />
+                                                                  ) : (
+                                                                    <ChevronRight className="h-2 w-2" />
+                                                                  )}
+                                                                </div>
+                                                              </div>
+                                                            </CardHeader>
+                                                          </CollapsibleTrigger>
 
-                                                            <CollapsibleContent>
-                                                              <CardContent className="pt-0 pb-1">
-                                                                {project.tasks.length === 0 ? (
-                                                                  <div className="text-center py-2 text-muted-foreground text-xs">
-                                                                    <CheckSquare className="h-4 w-4 mx-auto mb-1 opacity-50" />
-                                                                    <p>No tasks in this project yet.</p>
-                                                                  </div>
-                                                                ) : (
-                                                                  <div className="ml-3 space-y-1">
-                                                                    {project.tasks.map((task) => (
-                                                                      <div key={task.id} className="flex items-center justify-between text-xs p-1 bg-muted/20 rounded">
-                                                                        <div className="flex items-center gap-1">
-                                                                          <CheckSquare className="h-2 w-2 text-purple-500" />
-                                                                          <span>{task.title}</span>
-                                                                        </div>
-                                                                        <div className="flex gap-1">
-                                                                          <Badge className={getStatusColor(task.status)}>
-                                                                            {task.status}
-                                                                          </Badge>
-                                                                          {task.priority && (
-                                                                            <Badge className={getPriorityColor(task.priority)}>
-                                                                              {task.priority}
-                                                                            </Badge>
-                                                                          )}
-                                                                        </div>
+                                                          <CollapsibleContent>
+                                                            <CardContent className="pt-0 pb-1">
+                                                              {project.tasks.length === 0 ? (
+                                                                <div className="text-center py-2 text-muted-foreground text-xs">
+                                                                  <CheckSquare className="h-4 w-4 mx-auto mb-1 opacity-50" />
+                                                                  <p>No tasks in this project yet.</p>
+                                                                </div>
+                                                              ) : (
+                                                                <div className="ml-3 space-y-1">
+                                                                  {project.tasks.map((task) => (
+                                                                    <div key={task.id} className="flex items-center justify-between text-xs p-1 bg-muted/20 rounded">
+                                                                      <div className="flex items-center gap-1">
+                                                                        <CheckSquare className="h-2 w-2 text-purple-500" />
+                                                                        <span>{task.title}</span>
                                                                       </div>
-                                                                    ))}
-                                                                  </div>
-                                                                )}
-                                                              </CardContent>
-                                                            </CollapsibleContent>
-                                                          </Collapsible>
-                                                        </Card>
-                                                      ))}
-                                                    </div>
+                                                                      <div className="flex gap-1">
+                                                                        <Badge className={getStatusColor(task.status)}>
+                                                                          {task.status}
+                                                                        </Badge>
+                                                                        {task.priority && (
+                                                                          <Badge className={getPriorityColor(task.priority)}>
+                                                                            {task.priority}
+                                                                          </Badge>
+                                                                        )}
+                                                                      </div>
+                                                                    </div>
+                                                                  ))}
+                                                                </div>
+                                                              )}
+                                                            </CardContent>
+                                                          </CollapsibleContent>
+                                                        </Collapsible>
+                                                      </Card>
+                                                    ))}
                                                   </div>
-                                                )}
-                                              </div>
-                                            </CardContent>
-                                          </CollapsibleContent>
-                                        </Collapsible>
-                                      </Card>
-                                    ))}
-                                  </div>
-                                )}
-                              </CardContent>
-                            </CollapsibleContent>
+                                                </div>
+                                              )}
+                                            </div>
+                                          </CardContent>
+                                        </CollapsibleContent>
+                                      </Collapsible>
+                                    </Card>
+                                  ))}
+                                </div>
+                              )}
+                            </CardContent>
+                          </CollapsibleContent>
                         </Collapsible>
                       </Card>
                     ))}
