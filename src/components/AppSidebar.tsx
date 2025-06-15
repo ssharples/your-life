@@ -28,6 +28,7 @@ import {
   SidebarSeparator,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
+import { ThemeSwitcher } from './ThemeSwitcher';
 
 const items = [
   {
@@ -143,6 +144,9 @@ export function AppSidebar({
                 {userEmail}
               </span>
             </div>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <ThemeSwitcher />
           </SidebarMenuItem>
           <SidebarMenuItem>
             <Button 
