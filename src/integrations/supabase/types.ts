@@ -1356,16 +1356,49 @@ export type Database = {
           },
         ]
       }
+      review_templates: {
+        Row: {
+          created_at: string | null
+          id: string
+          prompts: Json | null
+          review_type: string
+          step_description: string | null
+          step_number: number
+          step_title: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          prompts?: Json | null
+          review_type: string
+          step_description?: string | null
+          step_number: number
+          step_title: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          prompts?: Json | null
+          review_type?: string
+          step_description?: string | null
+          step_number?: number
+          step_title?: string
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           created_at: string
           date: string
           id: string
+          is_completed: boolean | null
           linked_goals: string[] | null
           linked_journals: string[] | null
           reflections: string | null
+          review_step: number | null
           review_type: string
           summary: string | null
+          template_responses: Json | null
           updated_at: string
           user_id: string
         }
@@ -1373,11 +1406,14 @@ export type Database = {
           created_at?: string
           date: string
           id?: string
+          is_completed?: boolean | null
           linked_goals?: string[] | null
           linked_journals?: string[] | null
           reflections?: string | null
+          review_step?: number | null
           review_type: string
           summary?: string | null
+          template_responses?: Json | null
           updated_at?: string
           user_id: string
         }
@@ -1385,11 +1421,14 @@ export type Database = {
           created_at?: string
           date?: string
           id?: string
+          is_completed?: boolean | null
           linked_goals?: string[] | null
           linked_journals?: string[] | null
           reflections?: string | null
+          review_step?: number | null
           review_type?: string
           summary?: string | null
+          template_responses?: Json | null
           updated_at?: string
           user_id?: string
         }

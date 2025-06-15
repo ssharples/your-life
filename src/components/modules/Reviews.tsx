@@ -3,22 +3,19 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
-import { Plus, FileText, Calendar } from 'lucide-react';
+import { Plus, FileText, Calendar, Clock, CheckCircle, Edit } from 'lucide-react';
 import { ReviewsGuide } from '@/components/guides/ReviewsGuide';
+import { GuidedReview } from './reviews/GuidedReview';
 
 export const Reviews = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [reviewType, setReviewType] = useState<'daily' | 'weekly' | 'monthly' | 'quarterly' | 'annual'>('daily');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [summary, setSummary] = useState('');
-  const [reflections, setReflections] = useState('');
+  const [selectedReviewType, setSelectedReviewType] = useState<'daily' | 'weekly' | 'monthly' | 'quarterly' | 'annual'>('daily');
+  const [activeGuidedReview, setActiveGuidedReview] = useState<{ type: string; id?: string } | null>(null);
   const queryClient = useQueryClient();
 
   const { data: reviews } = useQuery({
@@ -38,41 +35,18 @@ export const Reviews = () => {
     },
   });
 
-  const createReview = useMutation({
-    mutationFn: async (newReview: any) => {
-      const user = await supabase.auth.getUser();
-      if (!user.data.user) throw new Error('Not authenticated');
-
-      const { data, error } = await supabase
-        .from('reviews')
-        .insert([{ 
-          ...newReview, 
-          user_id: user.data.user.id,
-          date: date
-        }])
-        .select();
-      
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reviews'] });
-      toast({ title: "Success", description: "Review created successfully!" });
-      resetForm();
-    },
-  });
-
-  const resetForm = () => {
-    setReviewType('daily');
-    setDate(new Date().toISOString().split('T')[0]);
-    setSummary('');
-    setReflections('');
+  const startGuidedReview = () => {
+    setActiveGuidedReview({ type: selectedReviewType });
     setIsDialogOpen(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    createReview.mutate({ review_type: reviewType, summary, reflections });
+  const continueReview = (review: any) => {
+    setActiveGuidedReview({ type: review.review_type, id: review.id });
+  };
+
+  const handleReviewComplete = () => {
+    setActiveGuidedReview(null);
+    queryClient.invalidateQueries({ queryKey: ['reviews'] });
   };
 
   const getTypeColor = (type: string) => {
@@ -86,6 +60,19 @@ export const Reviews = () => {
     }
   };
 
+  if (activeGuidedReview) {
+    return (
+      <div className="space-y-6">
+        <GuidedReview
+          reviewType={activeGuidedReview.type as any}
+          reviewId={activeGuidedReview.id}
+          onComplete={handleReviewComplete}
+          onCancel={() => setActiveGuidedReview(null)}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <ReviewsGuide />
@@ -93,52 +80,39 @@ export const Reviews = () => {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Reviews</h2>
-          <p className="text-muted-foreground">Conduct regular reviews and reflections</p>
+          <p className="text-muted-foreground">Conduct structured reviews and reflections</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => resetForm()}>
+            <Button>
               <Plus className="h-4 w-4 mr-2" />
-              New Review
+              Start Review
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create Review</DialogTitle>
+              <DialogTitle>Start a New Review</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <Select value={reviewType} onValueChange={(value: any) => setReviewType(value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Review type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="daily">Daily Review</SelectItem>
-                  <SelectItem value="weekly">Weekly Review</SelectItem>
-                  <SelectItem value="monthly">Monthly Review</SelectItem>
-                  <SelectItem value="quarterly">Quarterly Review</SelectItem>
-                  <SelectItem value="annual">Annual Review</SelectItem>
-                </SelectContent>
-              </Select>
-              <Input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                required
-              />
-              <Textarea
-                placeholder="Summary of the period..."
-                value={summary}
-                onChange={(e) => setSummary(e.target.value)}
-                rows={4}
-              />
-              <Textarea
-                placeholder="Key reflections, insights, and learnings..."
-                value={reflections}
-                onChange={(e) => setReflections(e.target.value)}
-                rows={6}
-              />
-              <Button type="submit" className="w-full">Create Review</Button>
-            </form>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Review Type</label>
+                <Select value={selectedReviewType} onValueChange={(value: any) => setSelectedReviewType(value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select review type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="daily">Daily Review</SelectItem>
+                    <SelectItem value="weekly">Weekly Review</SelectItem>
+                    <SelectItem value="monthly">Monthly Review</SelectItem>
+                    <SelectItem value="quarterly">Quarterly Review</SelectItem>
+                    <SelectItem value="annual">Annual Review</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button onClick={startGuidedReview} className="w-full">
+                Start Guided Review
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
@@ -156,6 +130,17 @@ export const Reviews = () => {
                   <Badge className={getTypeColor(review.review_type)}>
                     {review.review_type}
                   </Badge>
+                  {review.is_completed ? (
+                    <Badge variant="default">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Complete
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline">
+                      <Clock className="h-3 w-3 mr-1" />
+                      In Progress
+                    </Badge>
+                  )}
                   <div className="flex items-center text-sm text-muted-foreground">
                     <Calendar className="h-3 w-3 mr-1" />
                     {new Date(review.date).toLocaleDateString()}
@@ -164,21 +149,47 @@ export const Reviews = () => {
               </div>
             </CardHeader>
             <CardContent>
-              {review.summary && (
-                <div className="mb-4">
-                  <h4 className="font-medium text-sm mb-2">Summary:</h4>
-                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">{review.summary}</p>
+              <div className="flex justify-between items-center">
+                <div className="flex-1">
+                  {review.summary && (
+                    <p className="text-sm text-muted-foreground mb-2">{review.summary}</p>
+                  )}
+                  {review.template_responses && Object.keys(review.template_responses).length > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      {Object.keys(review.template_responses).length} responses recorded
+                    </p>
+                  )}
                 </div>
-              )}
-              {review.reflections && (
-                <div>
-                  <h4 className="font-medium text-sm mb-2">Reflections:</h4>
-                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">{review.reflections}</p>
-                </div>
-              )}
+                {!review.is_completed && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => continueReview(review)}
+                  >
+                    <Edit className="h-3 w-3 mr-1" />
+                    Continue
+                  </Button>
+                )}
+              </div>
             </CardContent>
           </Card>
         ))}
+        
+        {reviews?.length === 0 && (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium mb-2">No reviews yet</h3>
+              <p className="text-muted-foreground mb-6">
+                Start your first guided review to begin reflecting on your progress and planning ahead.
+              </p>
+              <Button onClick={() => setIsDialogOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Start Your First Review
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
