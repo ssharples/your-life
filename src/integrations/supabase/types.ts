@@ -693,6 +693,141 @@ export type Database = {
         }
         Relationships: []
       }
+      goals: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          pillar_id: string | null
+          priority: number | null
+          status: string
+          target_date: string | null
+          title: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          pillar_id?: string | null
+          priority?: number | null
+          status?: string
+          target_date?: string | null
+          title: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          pillar_id?: string | null
+          priority?: number | null
+          status?: string
+          target_date?: string | null
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goals_pillar_id_fkey"
+            columns: ["pillar_id"]
+            isOneToOne: false
+            referencedRelation: "pillars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      habit_logs: {
+        Row: {
+          completed: boolean
+          created_at: string
+          date: string
+          habit_id: string
+          id: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          date: string
+          habit_id: string
+          id?: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          date?: string
+          habit_id?: string
+          id?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habit_logs_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: false
+            referencedRelation: "habits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      habits: {
+        Row: {
+          created_at: string
+          description: string | null
+          frequency: string
+          goal_id: string | null
+          id: string
+          status: string
+          title: string
+          tracking_period: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          frequency?: string
+          goal_id?: string | null
+          id?: string
+          status?: string
+          title: string
+          tracking_period?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          frequency?: string
+          goal_id?: string | null
+          id?: string
+          status?: string
+          title?: string
+          tracking_period?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habits_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       images: {
         Row: {
           Price: number | null
@@ -707,6 +842,213 @@ export type Database = {
           url?: string | null
         }
         Relationships: []
+      }
+      journals: {
+        Row: {
+          content: string
+          created_at: string
+          date: string
+          entry_type: string
+          id: string
+          insights: string | null
+          mood_rating: number | null
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          date: string
+          entry_type?: string
+          id?: string
+          insights?: string | null
+          mood_rating?: number | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          date?: string
+          entry_type?: string
+          id?: string
+          insights?: string | null
+          mood_rating?: number | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      knowledge_vault: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          linked_goal_id: string | null
+          linked_project_id: string | null
+          source: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          linked_goal_id?: string | null
+          linked_project_id?: string | null
+          source?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          linked_goal_id?: string | null
+          linked_project_id?: string | null
+          source?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_vault_linked_goal_id_fkey"
+            columns: ["linked_goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_vault_linked_project_id_fkey"
+            columns: ["linked_project_id"]
+            isOneToOne: false
+            referencedRelation: "los_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      los_projects: {
+        Row: {
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          linked_goal_id: string | null
+          pillar_id: string | null
+          start_date: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          linked_goal_id?: string | null
+          pillar_id?: string | null
+          start_date?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          linked_goal_id?: string | null
+          pillar_id?: string | null
+          start_date?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "los_projects_linked_goal_id_fkey"
+            columns: ["linked_goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "los_projects_pillar_id_fkey"
+            columns: ["pillar_id"]
+            isOneToOne: false
+            referencedRelation: "pillars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      los_tasks: {
+        Row: {
+          created_at: string
+          description: string
+          due_date: string | null
+          goal_id: string | null
+          id: string
+          priority: number | null
+          project_id: string | null
+          status: string
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          due_date?: string | null
+          goal_id?: string | null
+          id?: string
+          priority?: number | null
+          project_id?: string | null
+          status?: string
+          tags?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          due_date?: string | null
+          goal_id?: string | null
+          id?: string
+          priority?: number | null
+          project_id?: string | null
+          status?: string
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "los_tasks_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "los_tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "los_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lyric_analyses: {
         Row: {
@@ -833,6 +1175,33 @@ export type Database = {
           id?: number
           message?: Json
           session_id?: string
+        }
+        Relationships: []
+      }
+      pillars: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -987,6 +1356,45 @@ export type Database = {
           },
         ]
       }
+      reviews: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          linked_goals: string[] | null
+          linked_journals: string[] | null
+          reflections: string | null
+          review_type: string
+          summary: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          linked_goals?: string[] | null
+          linked_journals?: string[] | null
+          reflections?: string | null
+          review_type: string
+          summary?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          linked_goals?: string[] | null
+          linked_journals?: string[] | null
+          reflections?: string | null
+          review_type?: string
+          summary?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       revisions: {
         Row: {
           assignee_id: string | null
@@ -1116,6 +1524,36 @@ export type Database = {
           id?: string
           purchase_date?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      values_vault: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          importance_rating: number | null
+          updated_at: string
+          user_id: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          importance_rating?: number | null
+          updated_at?: string
+          user_id: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          importance_rating?: number | null
+          updated_at?: string
+          user_id?: string
+          value?: string
         }
         Relationships: []
       }
