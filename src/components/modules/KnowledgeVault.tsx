@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,17 +9,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
-import { Plus, Brain, ExternalLink } from 'lucide-react';
+import { Plus, Lightbulb, ExternalLink, BookOpen } from 'lucide-react';
 import { KnowledgeGuide } from '@/components/guides/KnowledgeGuide';
+import { useHelp } from '@/contexts/HelpContext';
 
 export const KnowledgeVault = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [title, setTitle] = useState('');
-  const [source, setSource] = useState('');
   const [content, setContent] = useState('');
-  const [linkedGoalId, setLinkedGoalId] = useState('');
-  const [linkedProjectId, setLinkedProjectId] = useState('');
+  const [source, setSource] = useState('');
+  const [tags, setTags] = useState('');
+  const [goalId, setGoalId] = useState('');
+  const [projectId, setProjectId] = useState('');
   const queryClient = useQueryClient();
+  const { showHelp } = useHelp();
 
   const { data: knowledgeItems } = useQuery({
     queryKey: ['knowledge-vault'],
@@ -75,7 +77,7 @@ export const KnowledgeVault = () => {
     },
   });
 
-  const createKnowledgeItem = useMutation({
+  const createKnowledge = useMutation({
     mutationFn: async (newItem: any) => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('Not authenticated');
@@ -102,26 +104,35 @@ export const KnowledgeVault = () => {
 
   const resetForm = () => {
     setTitle('');
-    setSource('');
     setContent('');
-    setLinkedGoalId('');
-    setLinkedProjectId('');
+    setSource('');
+    setTags('');
+    setGoalId('');
+    setProjectId('');
     setIsDialogOpen(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createKnowledgeItem.mutate({ title, source, content });
+    const tagsArray = tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+    createKnowledge.mutate({ 
+      title, 
+      content, 
+      source, 
+      tags: tagsArray,
+      linked_goal_id: goalId || null,
+      linked_project_id: projectId || null
+    });
   };
 
   return (
     <div className="space-y-6">
-      <KnowledgeGuide />
+      {showHelp && <KnowledgeGuide />}
       
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Knowledge Vault</h2>
-          <p className="text-muted-foreground">Store and organize your insights, notes, and ideas</p>
+          <p className="text-muted-foreground">Capture and organize your insights and learnings</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
@@ -132,90 +143,123 @@ export const KnowledgeVault = () => {
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Add Knowledge Item</DialogTitle>
+              <DialogTitle>Add New Knowledge</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <Input
-                placeholder="Title"
+                placeholder="Title or main insight"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
               />
-              <Input
-                placeholder="Source (optional)"
-                value={source}
-                onChange={(e) => setSource(e.target.value)}
-              />
               <Textarea
-                placeholder="Content, notes, or insights..."
+                placeholder="Detailed content, notes, or explanation..."
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 required
-                rows={8}
+                rows={6}
               />
-              <Select value={linkedGoalId} onValueChange={setLinkedGoalId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Link to goal (optional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {goals?.map((goal) => (
-                    <SelectItem key={goal.id} value={goal.id}>
-                      {goal.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={linkedProjectId} onValueChange={setLinkedProjectId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Link to project (optional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {projects?.map((project) => (
-                    <SelectItem key={project.id} value={project.id}>
-                      {project.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button type="submit" className="w-full">Add to Knowledge Vault</Button>
+              <Input
+                placeholder="Source (book, article, video, etc.)"
+                value={source}
+                onChange={(e) => setSource(e.target.value)}
+              />
+              <div className="grid grid-cols-2 gap-4">
+                <Select value={goalId} onValueChange={setGoalId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Link to goal (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {goals?.map((goal) => (
+                      <SelectItem key={goal.id} value={goal.id}>
+                        {goal.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={projectId} onValueChange={setProjectId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Link to project (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {projects?.map((project) => (
+                      <SelectItem key={project.id} value={project.id}>
+                        {project.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Input
+                placeholder="Tags (comma-separated)"
+                value={tags}
+                onChange={(e) => setTags(e.target.value)}
+              />
+              <Button type="submit" className="w-full">Add Knowledge</Button>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {knowledgeItems?.map((item) => (
-          <Card key={item.id}>
+          <Card key={item.id} className="h-fit">
             <CardHeader>
-              <div className="flex justify-between items-start">
-                <CardTitle className="text-lg flex items-center">
-                  <Brain className="h-4 w-4 mr-2" />
-                  {item.title}
-                </CardTitle>
-                {item.source && (
-                  <Badge variant="outline" className="flex items-center">
-                    <ExternalLink className="h-3 w-3 mr-1" />
-                    Source
-                  </Badge>
-                )}
-              </div>
+              <CardTitle className="text-lg flex items-start gap-2">
+                <Lightbulb className="h-4 w-4 mt-1 flex-shrink-0" />
+                <span className="line-clamp-2">{item.title}</span>
+              </CardTitle>
               <div className="flex flex-wrap gap-2">
                 {item.goals && (
-                  <Badge variant="outline">Goal: {item.goals.title}</Badge>
+                  <Badge variant="secondary" className="text-xs">
+                    Goal: {item.goals.title}
+                  </Badge>
                 )}
                 {item.los_projects && (
-                  <Badge variant="secondary">Project: {item.los_projects.title}</Badge>
+                  <Badge variant="outline" className="text-xs">
+                    Project: {item.los_projects.title}
+                  </Badge>
                 )}
               </div>
             </CardHeader>
             <CardContent>
-              {item.source && (
-                <p className="text-xs text-muted-foreground mb-2">Source: {item.source}</p>
-              )}
-              <p className="text-sm whitespace-pre-wrap">{item.content}</p>
-              <p className="text-xs text-muted-foreground mt-2">
-                Added: {new Date(item.created_at).toLocaleDateString()}
-              </p>
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground line-clamp-4">{item.content}</p>
+                {item.source && (
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    {item.source.startsWith('http') ? (
+                      <>
+                        <ExternalLink className="h-3 w-3" />
+                        <a 
+                          href={item.source} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="hover:underline truncate"
+                        >
+                          {item.source}
+                        </a>
+                      </>
+                    ) : (
+                      <>
+                        <BookOpen className="h-3 w-3" />
+                        <span className="truncate">{item.source}</span>
+                      </>
+                    )}
+                  </div>
+                )}
+                {item.tags && item.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {item.tags.map((tag, index) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+                <div className="text-xs text-muted-foreground">
+                  Added: {new Date(item.created_at).toLocaleDateString()}
+                </div>
+              </div>
             </CardContent>
           </Card>
         ))}

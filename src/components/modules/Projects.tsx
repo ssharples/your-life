@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,8 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
-import { Plus, FolderOpen, Calendar } from 'lucide-react';
+import { Plus, FolderOpen, Calendar, Play, Pause, CheckCircle } from 'lucide-react';
 import { ProjectsGuide } from '@/components/guides/ProjectsGuide';
+import { useHelp } from '@/contexts/HelpContext';
 
 export const Projects = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -19,9 +19,10 @@ export const Projects = () => {
   const [description, setDescription] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [linkedGoalId, setLinkedGoalId] = useState('');
+  const [goalId, setGoalId] = useState('');
   const [pillarId, setPillarId] = useState('');
   const queryClient = useQueryClient();
+  const { showHelp } = useHelp();
 
   const { data: projects } = useQuery({
     queryKey: ['los-projects'],
@@ -86,7 +87,7 @@ export const Projects = () => {
         .insert([{ 
           ...newProject, 
           user_id: user.data.user.id,
-          linked_goal_id: linkedGoalId || null,
+          linked_goal_id: goalId || null,
           pillar_id: pillarId || null,
           start_date: startDate || null,
           end_date: endDate || null
@@ -125,35 +126,34 @@ export const Projects = () => {
     setDescription('');
     setStartDate('');
     setEndDate('');
-    setLinkedGoalId('');
+    setGoalId('');
     setPillarId('');
     setIsDialogOpen(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createProject.mutate({ title, description });
+    createProject.mutate({ title, description, start_date: startDate, end_date: endDate, linked_goal_id: goalId, pillar_id: pillarId });
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return 'bg-green-100 text-green-800';
       case 'active': return 'bg-blue-100 text-blue-800';
-      case 'planning': return 'bg-purple-100 text-purple-800';
       case 'paused': return 'bg-yellow-100 text-yellow-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
+      case 'planning': return 'bg-purple-100 text-purple-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   return (
     <div className="space-y-6">
-      <ProjectsGuide />
+      {showHelp && <ProjectsGuide />}
       
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Projects</h2>
-          <p className="text-muted-foreground">Manage your projects and pipelines</p>
+          <p className="text-muted-foreground">Manage your structured work plans</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
@@ -178,7 +178,21 @@ export const Projects = () => {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
-              <Select value={linkedGoalId} onValueChange={setLinkedGoalId}>
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  type="date"
+                  placeholder="Start date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+                <Input
+                  type="date"
+                  placeholder="End date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </div>
+              <Select value={goalId} onValueChange={setGoalId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Link to goal (optional)" />
                 </SelectTrigger>
@@ -192,7 +206,7 @@ export const Projects = () => {
               </Select>
               <Select value={pillarId} onValueChange={setPillarId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select pillar (optional)" />
+                  <SelectValue placeholder="Assign to pillar (optional)" />
                 </SelectTrigger>
                 <SelectContent>
                   {pillars?.map((pillar) => (
@@ -202,24 +216,6 @@ export const Projects = () => {
                   ))}
                 </SelectContent>
               </Select>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium">Start Date</label>
-                  <Input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">End Date</label>
-                  <Input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                  />
-                </div>
-              </div>
               <Button type="submit" className="w-full">Create Project</Button>
             </form>
           </DialogContent>
@@ -241,10 +237,10 @@ export const Projects = () => {
               </div>
               <div className="flex flex-wrap gap-2">
                 {project.goals && (
-                  <Badge variant="outline">Goal: {project.goals.title}</Badge>
+                  <Badge variant="secondary">{project.goals.title}</Badge>
                 )}
                 {project.pillars && (
-                  <Badge variant="secondary">{project.pillars.name}</Badge>
+                  <Badge variant="outline">{project.pillars.name}</Badge>
                 )}
               </div>
             </CardHeader>
@@ -252,28 +248,27 @@ export const Projects = () => {
               {project.description && (
                 <p className="text-sm text-muted-foreground mb-2">{project.description}</p>
               )}
-              {(project.start_date || project.end_date) && (
-                <div className="text-sm text-muted-foreground mb-4">
-                  {project.start_date && (
-                    <div className="flex items-center">
-                      <Calendar className="h-3 w-3 mr-1" />
-                      Start: {new Date(project.start_date).toLocaleDateString()}
-                    </div>
-                  )}
-                  {project.end_date && (
-                    <div className="flex items-center">
-                      <Calendar className="h-3 w-3 mr-1" />
-                      End: {new Date(project.end_date).toLocaleDateString()}
-                    </div>
-                  )}
-                </div>
-              )}
-              <div className="flex space-x-2">
+              <div className="space-y-2 text-sm text-muted-foreground">
+                {project.start_date && (
+                  <div className="flex items-center">
+                    <Calendar className="h-3 w-3 mr-1" />
+                    Start: {new Date(project.start_date).toLocaleDateString()}
+                  </div>
+                )}
+                {project.end_date && (
+                  <div className="flex items-center">
+                    <Calendar className="h-3 w-3 mr-1" />
+                    End: {new Date(project.end_date).toLocaleDateString()}
+                  </div>
+                )}
+              </div>
+              <div className="flex space-x-2 mt-4">
                 {project.status === 'planning' && (
                   <Button
                     size="sm"
                     onClick={() => updateProjectStatus.mutate({ id: project.id, status: 'active' })}
                   >
+                    <Play className="h-3 w-3 mr-1" />
                     Start
                   </Button>
                 )}
@@ -283,6 +278,7 @@ export const Projects = () => {
                       size="sm"
                       onClick={() => updateProjectStatus.mutate({ id: project.id, status: 'completed' })}
                     >
+                      <CheckCircle className="h-3 w-3 mr-1" />
                       Complete
                     </Button>
                     <Button
@@ -290,6 +286,7 @@ export const Projects = () => {
                       variant="outline"
                       onClick={() => updateProjectStatus.mutate({ id: project.id, status: 'paused' })}
                     >
+                      <Pause className="h-3 w-3 mr-1" />
                       Pause
                     </Button>
                   </>
@@ -297,9 +294,9 @@ export const Projects = () => {
                 {project.status === 'paused' && (
                   <Button
                     size="sm"
-                    variant="outline"
                     onClick={() => updateProjectStatus.mutate({ id: project.id, status: 'active' })}
                   >
+                    <Play className="h-3 w-3 mr-1" />
                     Resume
                   </Button>
                 )}
