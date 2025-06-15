@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,6 +12,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from '@/hooks/use-toast';
 import { Plus, CheckSquare, Calendar } from 'lucide-react';
 import { TasksGuide } from '@/components/guides/TasksGuide';
+import { QuickGoalCreator } from '@/components/modules/reviews/components/QuickGoalCreator';
+import { QuickProjectCreator } from '@/components/modules/reviews/components/QuickProjectCreator';
 
 export const Tasks = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -22,6 +23,9 @@ export const Tasks = () => {
   const [projectId, setProjectId] = useState('');
   const [goalId, setGoalId] = useState('');
   const [tags, setTags] = useState('');
+  const [showGoalModal, setShowGoalModal] = useState(false);
+  const [showProjectModal, setShowProjectModal] = useState(false);
+  const [pendingTaskData, setPendingTaskData] = useState<any>(null);
   const queryClient = useQueryClient();
 
   const { data: tasks } = useQuery({
@@ -100,7 +104,15 @@ export const Tasks = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['los-tasks'] });
       toast({ title: "Success", description: "Task created successfully!" });
-      resetForm();
+      
+      // Check if we need to show modals for quick-created goals/projects
+      if (pendingTaskData?.newGoal) {
+        setShowGoalModal(true);
+      } else if (pendingTaskData?.newProject) {
+        setShowProjectModal(true);
+      } else {
+        resetForm();
+      }
     },
   });
 
@@ -129,11 +141,32 @@ export const Tasks = () => {
     setGoalId('');
     setTags('');
     setIsDialogOpen(false);
+    setPendingTaskData(null);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createTask.mutate({ description, priority });
+    const taskData = { description, priority };
+    setPendingTaskData(taskData);
+    createTask.mutate(taskData);
+  };
+
+  const handleGoalChange = (value: string) => {
+    if (value === 'new-goal') {
+      setGoalId('');
+      setPendingTaskData({ ...pendingTaskData, newGoal: true });
+    } else {
+      setGoalId(value);
+    }
+  };
+
+  const handleProjectChange = (value: string) => {
+    if (value === 'new-project') {
+      setProjectId('');
+      setPendingTaskData({ ...pendingTaskData, newProject: true });
+    } else {
+      setProjectId(value);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -179,11 +212,17 @@ export const Tasks = () => {
                 onChange={(e) => setDescription(e.target.value)}
                 required
               />
-              <Select value={goalId} onValueChange={setGoalId}>
+              <Select value={goalId} onValueChange={handleGoalChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Link to goal (optional)" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="new-goal">
+                    <span className="flex items-center gap-2">
+                      <Plus className="h-3 w-3" />
+                      Create new goal
+                    </span>
+                  </SelectItem>
                   {goals?.map((goal) => (
                     <SelectItem key={goal.id} value={goal.id}>
                       {goal.title}
@@ -191,11 +230,17 @@ export const Tasks = () => {
                   ))}
                 </SelectContent>
               </Select>
-              <Select value={projectId} onValueChange={setProjectId}>
+              <Select value={projectId} onValueChange={handleProjectChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Link to project (optional)" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="new-project">
+                    <span className="flex items-center gap-2">
+                      <Plus className="h-3 w-3" />
+                      Create new project
+                    </span>
+                  </SelectItem>
                   {projects?.map((project) => (
                     <SelectItem key={project.id} value={project.id}>
                       {project.title}
@@ -302,6 +347,23 @@ export const Tasks = () => {
           </Card>
         ))}
       </div>
+
+      {/* Modal Components */}
+      <QuickGoalCreator 
+        isOpen={showGoalModal} 
+        onClose={() => {
+          setShowGoalModal(false);
+          resetForm();
+        }} 
+      />
+      
+      <QuickProjectCreator 
+        isOpen={showProjectModal} 
+        onClose={() => {
+          setShowProjectModal(false);
+          resetForm();
+        }} 
+      />
     </div>
   );
 };
