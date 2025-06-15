@@ -1,9 +1,10 @@
 
 import * as React from "react"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { SidebarProvider as BaseSidebarProvider, useSidebar } from "./sidebar/context"
 
 // Core components
-export { SidebarProvider, useSidebar } from "./sidebar/context"
+export { useSidebar } from "./sidebar/context"
 export { Sidebar, SidebarInset } from "./sidebar/sidebar-core"
 
 // Layout components
@@ -40,19 +41,19 @@ export { SidebarTrigger, SidebarRail } from "./sidebar/sidebar-trigger"
 export { SidebarInput, SidebarSeparator } from "./sidebar/sidebar-input"
 
 // Wrap provider with TooltipProvider for convenience
-const SidebarProviderWithTooltip = React.forwardRef<
+const SidebarProvider = React.forwardRef<
   HTMLDivElement,
-  React.ComponentProps<typeof SidebarProvider>
+  React.ComponentProps<typeof BaseSidebarProvider>
 >(({ children, ...props }, ref) => {
   return (
     <TooltipProvider delayDuration={0}>
-      <SidebarProvider ref={ref} {...props}>
+      <BaseSidebarProvider ref={ref} {...props}>
         {children}
-      </SidebarProvider>
+      </BaseSidebarProvider>
     </TooltipProvider>
   )
 })
-SidebarProviderWithTooltip.displayName = "SidebarProviderWithTooltip"
+SidebarProvider.displayName = "SidebarProvider"
 
-// Export as default SidebarProvider for backward compatibility
-export { SidebarProviderWithTooltip as SidebarProvider }
+// Export the enhanced SidebarProvider
+export { SidebarProvider }
