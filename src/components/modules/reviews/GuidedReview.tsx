@@ -57,7 +57,11 @@ export const GuidedReview = ({ reviewType, reviewId, onComplete, onCancel }: Gui
   useEffect(() => {
     if (existingReview) {
       setCurrentStep(existingReview.review_step || 1);
-      setResponses(existingReview.template_responses || {});
+      // Safely handle the Json type from Supabase
+      const templateResponses = existingReview.template_responses;
+      if (templateResponses && typeof templateResponses === 'object' && !Array.isArray(templateResponses)) {
+        setResponses(templateResponses as Record<string, any>);
+      }
     }
   }, [existingReview]);
 
@@ -136,6 +140,19 @@ export const GuidedReview = ({ reviewType, reviewId, onComplete, onCancel }: Gui
 
   const progress = (currentStep / templates.length) * 100;
 
+  // Safely parse prompts from Json type
+  let prompts: string[] = [];
+  try {
+    if (currentTemplate.prompts && Array.isArray(currentTemplate.prompts)) {
+      prompts = currentTemplate.prompts as string[];
+    } else if (typeof currentTemplate.prompts === 'string') {
+      prompts = JSON.parse(currentTemplate.prompts);
+    }
+  } catch (error) {
+    console.error('Error parsing prompts:', error);
+    prompts = [];
+  }
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
@@ -177,7 +194,7 @@ export const GuidedReview = ({ reviewType, reviewId, onComplete, onCancel }: Gui
           {/* Standard prompts for all other steps */}
           {(reviewType !== 'daily' || (currentStep !== 1 && currentStep !== 2)) && (
             <div className="space-y-4">
-              {JSON.parse(currentTemplate.prompts).map((prompt: string, index: number) => (
+              {prompts.map((prompt: string, index: number) => (
                 <div key={index} className="space-y-2">
                   <label className="text-sm font-medium">{prompt}</label>
                   <Textarea
