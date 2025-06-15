@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,14 +18,18 @@ export const Tasks = () => {
   const { showHelp } = useHelp();
 
   const { data: tasks } = useQuery({
-    queryKey: ['tasks'],
+    queryKey: ['los-tasks'],
     queryFn: async () => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('Not authenticated');
 
       const { data, error } = await supabase
-        .from('tasks')
-        .select('*')
+        .from('los_tasks')
+        .select(`
+          *,
+          goals (title),
+          los_projects (title)
+        `)
         .eq('user_id', user.data.user.id)
         .order('created_at', { ascending: false });
 
@@ -50,13 +55,13 @@ export const Tasks = () => {
   });
 
   const { data: projects } = useQuery({
-    queryKey: ['projects'],
+    queryKey: ['los-projects'],
     queryFn: async () => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('Not authenticated');
 
       const { data, error } = await supabase
-        .from('projects')
+        .from('los_projects')
         .select('*')
         .eq('user_id', user.data.user.id);
 
@@ -71,7 +76,7 @@ export const Tasks = () => {
       if (!user.data.user) throw new Error('Not authenticated');
 
       const { data, error } = await supabase
-        .from('tasks')
+        .from('los_tasks')
         .insert([{ ...newTask, user_id: user.data.user.id }])
         .select();
 
@@ -79,7 +84,7 @@ export const Tasks = () => {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['los-tasks'] });
       toast({ title: "Success", description: "Task created successfully!" });
     },
   });
@@ -87,7 +92,7 @@ export const Tasks = () => {
   const updateTaskStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       const { data, error } = await supabase
-        .from('tasks')
+        .from('los_tasks')
         .update({ status })
         .eq('id', id)
         .select();
@@ -96,13 +101,32 @@ export const Tasks = () => {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['los-tasks'] });
       toast({ title: "Success", description: "Task updated successfully!" });
     },
   });
 
   const resetForm = () => {
     setIsDialogOpen(false);
+  };
+
+  const handleTaskSubmit = (taskData: any) => {
+    createTask.mutate(taskData);
+    setIsDialogOpen(false);
+  };
+
+  const handleGoalChange = (value: string) => {
+    if (value === 'new-goal') {
+      // Handle new goal creation
+      console.log('Create new goal');
+    }
+  };
+
+  const handleProjectChange = (value: string) => {
+    if (value === 'new-project') {
+      // Handle new project creation
+      console.log('Create new project');
+    }
   };
 
   const getStatusIcon = (status: string) => {
@@ -127,9 +151,11 @@ export const Tasks = () => {
           <p className="text-muted-foreground">Organize and track your daily tasks</p>
         </div>
         <TaskForm 
-          isOpen={isDialogOpen} 
-          onOpenChange={setIsDialogOpen}
-          onClose={resetForm}
+          goals={goals}
+          projects={projects}
+          onSubmit={handleTaskSubmit}
+          onGoalChange={handleGoalChange}
+          onProjectChange={handleProjectChange}
         />
       </div>
 
@@ -148,11 +174,8 @@ export const Tasks = () => {
             {activeTasks.map((task) => (
               <TaskCard 
                 key={task.id} 
-                task={task} 
-                goals={goals}
-                projects={projects}
+                task={task}
                 onStatusUpdate={(id, status) => updateTaskStatus.mutate({ id, status })}
-                getStatusIcon={getStatusIcon}
               />
             ))}
             {activeTasks.length === 0 && (
@@ -177,11 +200,8 @@ export const Tasks = () => {
             {completedTasks.map((task) => (
               <TaskCard 
                 key={task.id} 
-                task={task} 
-                goals={goals}
-                projects={projects}
+                task={task}
                 onStatusUpdate={(id, status) => updateTaskStatus.mutate({ id, status })}
-                getStatusIcon={getStatusIcon}
               />
             ))}
             {completedTasks.length === 0 && (

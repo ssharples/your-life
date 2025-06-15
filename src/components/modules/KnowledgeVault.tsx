@@ -87,8 +87,8 @@ export const KnowledgeVault = () => {
         .insert([{ 
           ...newItem, 
           user_id: user.data.user.id,
-          linked_goal_id: linkedGoalId || null,
-          linked_project_id: linkedProjectId || null
+          linked_goal_id: goalId || null,
+          linked_project_id: projectId || null
         }])
         .select();
       
