@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { Plus, FileText, Calendar } from 'lucide-react';
+import { ReviewsGuide } from '@/components/guides/ReviewsGuide';
 
 export const Reviews = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -87,6 +88,8 @@ export const Reviews = () => {
 
   return (
     <div className="space-y-6">
+      <ReviewsGuide />
+      
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Reviews</h2>

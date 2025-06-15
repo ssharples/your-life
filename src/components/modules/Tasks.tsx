@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -11,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from '@/hooks/use-toast';
 import { Plus, CheckSquare, Calendar } from 'lucide-react';
+import { TasksGuide } from '@/components/guides/TasksGuide';
 
 export const Tasks = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -19,6 +21,7 @@ export const Tasks = () => {
   const [priority, setPriority] = useState(3);
   const [projectId, setProjectId] = useState('');
   const [goalId, setGoalId] = useState('');
+  const [tags, setTags] = useState('');
   const queryClient = useQueryClient();
 
   const { data: tasks } = useQuery({
@@ -31,27 +34,11 @@ export const Tasks = () => {
         .from('los_tasks')
         .select(`
           *,
-          los_projects (title),
-          goals (title)
+          goals (title),
+          los_projects (title)
         `)
         .eq('user_id', user.data.user.id)
         .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const { data: projects } = useQuery({
-    queryKey: ['los-projects'],
-    queryFn: async () => {
-      const user = await supabase.auth.getUser();
-      if (!user.data.user) throw new Error('Not authenticated');
-      
-      const { data, error } = await supabase
-        .from('los_projects')
-        .select('*')
-        .eq('user_id', user.data.user.id);
       
       if (error) throw error;
       return data;
@@ -74,6 +61,22 @@ export const Tasks = () => {
     },
   });
 
+  const { data: projects } = useQuery({
+    queryKey: ['los-projects'],
+    queryFn: async () => {
+      const user = await supabase.auth.getUser();
+      if (!user.data.user) throw new Error('Not authenticated');
+      
+      const { data, error } = await supabase
+        .from('los_projects')
+        .select('*')
+        .eq('user_id', user.data.user.id);
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const createTask = useMutation({
     mutationFn: async (newTask: any) => {
       const user = await supabase.auth.getUser();
@@ -86,7 +89,8 @@ export const Tasks = () => {
           user_id: user.data.user.id,
           project_id: projectId || null,
           goal_id: goalId || null,
-          due_date: dueDate || null
+          due_date: dueDate || null,
+          tags: tags ? tags.split(',').map(tag => tag.trim()) : []
         }])
         .select();
       
@@ -123,6 +127,7 @@ export const Tasks = () => {
     setPriority(3);
     setProjectId('');
     setGoalId('');
+    setTags('');
     setIsDialogOpen(false);
   };
 
@@ -135,7 +140,7 @@ export const Tasks = () => {
     switch (status) {
       case 'completed': return 'bg-green-100 text-green-800';
       case 'in-progress': return 'bg-blue-100 text-blue-800';
-      case 'pending': return 'bg-gray-100 text-gray-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
       case 'cancelled': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
@@ -149,10 +154,12 @@ export const Tasks = () => {
 
   return (
     <div className="space-y-6">
+      <TasksGuide />
+      
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Tasks</h2>
-          <p className="text-muted-foreground">Manage your individual tasks and to-dos</p>
+          <p className="text-muted-foreground">Manage your actionable tasks and to-dos</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
@@ -166,12 +173,36 @@ export const Tasks = () => {
               <DialogTitle>Create New Task</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <Input
-                placeholder="Task description"
+              <Textarea
+                placeholder="Task description (be specific and actionable)"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 required
               />
+              <Select value={goalId} onValueChange={setGoalId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Link to goal (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {goals?.map((goal) => (
+                    <SelectItem key={goal.id} value={goal.id}>
+                      {goal.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={projectId} onValueChange={setProjectId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Link to project (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {projects?.map((project) => (
+                    <SelectItem key={project.id} value={project.id}>
+                      {project.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Input
                 type="date"
                 placeholder="Due date"
@@ -190,30 +221,11 @@ export const Tasks = () => {
                   <SelectItem value="5">5 - Lowest</SelectItem>
                 </SelectContent>
               </Select>
-              <Select value={projectId} onValueChange={setProjectId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Link to project (optional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {projects?.map((project) => (
-                    <SelectItem key={project.id} value={project.id}>
-                      {project.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={goalId} onValueChange={setGoalId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Link to goal (optional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {goals?.map((goal) => (
-                    <SelectItem key={goal.id} value={goal.id}>
-                      {goal.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input
+                placeholder="Tags (comma-separated)"
+                value={tags}
+                onChange={(e) => setTags(e.target.value)}
+              />
               <Button type="submit" className="w-full">Create Task</Button>
             </form>
           </DialogContent>
@@ -225,46 +237,68 @@ export const Tasks = () => {
           <Card key={task.id} className={task.status === 'completed' ? 'opacity-75' : ''}>
             <CardHeader>
               <div className="flex justify-between items-start">
-                <div className="flex items-start space-x-3">
-                  <Checkbox
-                    checked={task.status === 'completed'}
-                    onCheckedChange={(checked) => 
-                      updateTaskStatus.mutate({ 
-                        id: task.id, 
-                        status: checked ? 'completed' : 'pending' 
-                      })
-                    }
-                  />
-                  <div>
-                    <CardTitle className={`text-lg ${task.status === 'completed' ? 'line-through' : ''}`}>
-                      {task.description}
-                    </CardTitle>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      <Badge className={getStatusColor(task.status)}>
-                        {task.status}
-                      </Badge>
-                      <Badge className={getPriorityColor(task.priority)}>
-                        Priority {task.priority}
-                      </Badge>
-                      {task.los_projects && (
-                        <Badge variant="outline">Project: {task.los_projects.title}</Badge>
-                      )}
-                      {task.goals && (
-                        <Badge variant="secondary">Goal: {task.goals.title}</Badge>
-                      )}
-                    </div>
-                  </div>
+                <CardTitle className="text-lg flex items-center">
+                  <CheckSquare className="h-4 w-4 mr-2" />
+                  {task.description}
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <Badge className={getStatusColor(task.status)}>
+                    {task.status}
+                  </Badge>
+                  <Badge className={getPriorityColor(task.priority)} variant="outline">
+                    P{task.priority}
+                  </Badge>
                 </div>
               </div>
+              <div className="flex flex-wrap gap-2">
+                {task.goals && (
+                  <Badge variant="outline">Goal: {task.goals.title}</Badge>
+                )}
+                {task.los_projects && (
+                  <Badge variant="secondary">Project: {task.los_projects.title}</Badge>
+                )}
+                {task.tags?.map((tag: string) => (
+                  <Badge key={tag} variant="outline" className="text-xs">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
             </CardHeader>
-            {task.due_date && (
-              <CardContent>
-                <div className="flex items-center text-sm text-muted-foreground">
+            <CardContent>
+              {task.due_date && (
+                <div className="flex items-center text-sm text-muted-foreground mb-4">
                   <Calendar className="h-3 w-3 mr-1" />
                   Due: {new Date(task.due_date).toLocaleDateString()}
                 </div>
-              </CardContent>
-            )}
+              )}
+              <div className="flex space-x-2">
+                {task.status === 'pending' && (
+                  <Button
+                    size="sm"
+                    onClick={() => updateTaskStatus.mutate({ id: task.id, status: 'in-progress' })}
+                  >
+                    Start
+                  </Button>
+                )}
+                {task.status !== 'completed' && (
+                  <Button
+                    size="sm"
+                    onClick={() => updateTaskStatus.mutate({ id: task.id, status: 'completed' })}
+                  >
+                    Complete
+                  </Button>
+                )}
+                {task.status === 'in-progress' && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => updateTaskStatus.mutate({ id: task.id, status: 'pending' })}
+                  >
+                    Pause
+                  </Button>
+                )}
+              </div>
+            </CardContent>
           </Card>
         ))}
       </div>

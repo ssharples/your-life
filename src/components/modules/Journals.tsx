@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { Plus, BookOpen, Calendar } from 'lucide-react';
+import { JournalsGuide } from '@/components/guides/JournalsGuide';
 
 export const Journals = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -86,6 +87,8 @@ export const Journals = () => {
 
   return (
     <div className="space-y-6">
+      <JournalsGuide />
+      
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Journal</h2>

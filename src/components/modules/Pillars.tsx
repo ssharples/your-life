@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2 } from 'lucide-react';
+import { PillarsGuide } from '@/components/guides/PillarsGuide';
 
 export const Pillars = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -108,6 +109,8 @@ export const Pillars = () => {
 
   return (
     <div className="space-y-6">
+      <PillarsGuide />
+      
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Life Pillars</h2>

@@ -9,7 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
-import { Plus, Heart, Star } from 'lucide-react';
+import { Plus, Heart, Star, Edit, Trash2 } from 'lucide-react';
+import { ValuesGuide } from '@/components/guides/ValuesGuide';
 
 export const ValuesVault = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -80,6 +81,8 @@ export const ValuesVault = () => {
 
   return (
     <div className="space-y-6">
+      <ValuesGuide />
+      
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Values Vault</h2>

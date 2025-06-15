@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from '@/hooks/use-toast';
 import { Plus, Zap, Calendar, CheckCircle } from 'lucide-react';
+import { HabitsGuide } from '@/components/guides/HabitsGuide';
 
 export const Habits = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -134,6 +135,8 @@ export const Habits = () => {
 
   return (
     <div className="space-y-6">
+      <HabitsGuide />
+      
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Habits</h2>

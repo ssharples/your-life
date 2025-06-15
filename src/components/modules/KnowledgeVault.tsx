@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { Plus, Brain, ExternalLink } from 'lucide-react';
+import { KnowledgeGuide } from '@/components/guides/KnowledgeGuide';
 
 export const KnowledgeVault = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -115,6 +116,8 @@ export const KnowledgeVault = () => {
 
   return (
     <div className="space-y-6">
+      <KnowledgeGuide />
+      
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Knowledge Vault</h2>

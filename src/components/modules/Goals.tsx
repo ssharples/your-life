@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { Plus, Target, Calendar } from 'lucide-react';
+import { GoalsGuide } from '@/components/guides/GoalsGuide';
 
 export const Goals = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -127,6 +127,8 @@ export const Goals = () => {
 
   return (
     <div className="space-y-6">
+      <GoalsGuide />
+      
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Goals</h2>
