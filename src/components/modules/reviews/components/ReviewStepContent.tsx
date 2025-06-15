@@ -5,6 +5,8 @@ import { CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DailyTaskReview } from '../DailyTaskReview';
 import { DailyHabitReview } from '../DailyHabitReview';
+import { NewTaskCreator } from './NewTaskCreator';
+import { useState } from 'react';
 
 interface ReviewStepContentProps {
   reviewType: string;
@@ -21,6 +23,8 @@ export const ReviewStepContent = ({
   responses, 
   onUpdateResponse 
 }: ReviewStepContentProps) => {
+  const [createdTasks, setCreatedTasks] = useState<any[]>(responses.created_tasks || []);
+
   // Safely parse prompts from Json type
   let prompts: string[] = [];
   try {
@@ -33,6 +37,18 @@ export const ReviewStepContent = ({
     console.error('Error parsing prompts:', error);
     prompts = [];
   }
+
+  const handleTaskCreated = (task: any) => {
+    const updatedTasks = [...createdTasks, task];
+    setCreatedTasks(updatedTasks);
+    onUpdateResponse('created_tasks', updatedTasks);
+  };
+
+  const handleTaskRemoved = (taskId: string) => {
+    const updatedTasks = createdTasks.filter(task => task.id !== taskId);
+    setCreatedTasks(updatedTasks);
+    onUpdateResponse('created_tasks', updatedTasks);
+  };
 
   return (
     <AnimatePresence mode="wait">
@@ -101,6 +117,21 @@ export const ReviewStepContent = ({
                 <DailyHabitReview 
                   responses={responses.habits || []}
                   onUpdate={(habits) => onUpdateResponse('habits', habits)}
+                />
+              </motion.div>
+            )}
+
+            {/* Task creation for step 4 of daily review */}
+            {reviewType === 'daily' && currentStep === 4 && (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <NewTaskCreator
+                  createdTasks={createdTasks}
+                  onTaskCreated={handleTaskCreated}
+                  onTaskRemoved={handleTaskRemoved}
                 />
               </motion.div>
             )}
