@@ -4,6 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Toggle } from '@/components/ui/toggle';
+import { HelpCircle } from 'lucide-react';
 import { Goals } from './modules/Goals';
 import { Journals } from './modules/Journals';
 import { Habits } from './modules/Habits';
@@ -14,14 +16,16 @@ import { Reviews } from './modules/Reviews';
 import { ValuesVault } from './modules/ValuesVault';
 import { Pillars } from './modules/Pillars';
 import { Overview } from './modules/Overview';
+import { HelpProvider, useHelp } from '@/contexts/HelpContext';
 import { User } from '@supabase/supabase-js';
 
 interface DashboardProps {
   user: User;
 }
 
-export const Dashboard = ({ user }: DashboardProps) => {
+const DashboardContent = ({ user }: DashboardProps) => {
   const [activeTab, setActiveTab] = useState('overview');
+  const { showHelp, toggleHelp } = useHelp();
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -36,9 +40,15 @@ export const Dashboard = ({ user }: DashboardProps) => {
               <h1 className="text-2xl font-bold text-gray-900">Life Operating System</h1>
               <p className="text-sm text-gray-600">Welcome back, {user.email}</p>
             </div>
-            <Button onClick={handleSignOut} variant="outline">
-              Sign Out
-            </Button>
+            <div className="flex items-center gap-4">
+              <Toggle pressed={showHelp} onPressedChange={toggleHelp} aria-label="Toggle help">
+                <HelpCircle className="h-4 w-4" />
+                {showHelp ? 'Hide Help' : 'Show Help'}
+              </Toggle>
+              <Button onClick={handleSignOut} variant="outline">
+                Sign Out
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -91,5 +101,13 @@ export const Dashboard = ({ user }: DashboardProps) => {
         </Tabs>
       </main>
     </div>
+  );
+};
+
+export const Dashboard = ({ user }: DashboardProps) => {
+  return (
+    <HelpProvider>
+      <DashboardContent user={user} />
+    </HelpProvider>
   );
 };

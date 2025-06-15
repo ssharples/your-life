@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { Plus, Target, Calendar } from 'lucide-react';
 import { GoalsGuide } from '@/components/guides/GoalsGuide';
+import { useHelp } from '@/contexts/HelpContext';
 
 export const Goals = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -21,6 +22,7 @@ export const Goals = () => {
   const [priority, setPriority] = useState(3);
   const [pillarId, setPillarId] = useState('');
   const queryClient = useQueryClient();
+  const { showHelp } = useHelp();
 
   const { data: goals } = useQuery({
     queryKey: ['goals'],
@@ -127,7 +129,7 @@ export const Goals = () => {
 
   return (
     <div className="space-y-6">
-      <GoalsGuide />
+      {showHelp && <GoalsGuide />}
       
       <div className="flex justify-between items-center">
         <div>

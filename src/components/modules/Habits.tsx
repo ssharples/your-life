@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,6 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from '@/hooks/use-toast';
 import { Plus, Zap, Calendar, CheckCircle } from 'lucide-react';
 import { HabitsGuide } from '@/components/guides/HabitsGuide';
+import { useHelp } from '@/contexts/HelpContext';
 
 export const Habits = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -20,6 +20,7 @@ export const Habits = () => {
   const [description, setDescription] = useState('');
   const [frequency, setFrequency] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const queryClient = useQueryClient();
+  const { showHelp } = useHelp();
 
   const { data: habits } = useQuery({
     queryKey: ['habits'],
@@ -135,7 +136,7 @@ export const Habits = () => {
 
   return (
     <div className="space-y-6">
-      <HabitsGuide />
+      {showHelp && <HabitsGuide />}
       
       <div className="flex justify-between items-center">
         <div>
