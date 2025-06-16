@@ -13,6 +13,8 @@ import {
   LogOut,
   User,
   Settings,
+  TrendingUp,
+  Brain,
 } from 'lucide-react';
 
 import {

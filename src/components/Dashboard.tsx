@@ -1,112 +1,99 @@
+
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Toggle } from '@/components/ui/toggle';
-import { HelpCircle } from 'lucide-react';
+import { SidebarProvider } from '@/components/ui/sidebar';
+import { AppSidebar } from './AppSidebar';
+import { Overview } from './modules/Overview';
+import { Analytics } from './modules/Analytics';
+import { SmartReviews } from './modules/SmartReviews';
+import { Pillars } from './modules/Pillars';
 import { Goals } from './modules/Goals';
-import { Journals } from './modules/Journals';
-import { Habits } from './modules/Habits';
 import { Projects } from './modules/Projects';
 import { Tasks } from './modules/Tasks';
+import { Habits } from './modules/Habits';
+import { Journals } from './modules/Journals';
 import { KnowledgeVault } from './modules/KnowledgeVault';
 import { Reviews } from './modules/Reviews';
 import { ValuesVault } from './modules/ValuesVault';
-import { Pillars } from './modules/Pillars';
-import { Overview } from './modules/Overview';
-import { HelpProvider, useHelp } from '@/contexts/HelpContext';
-import { ThemeProvider } from '@/contexts/ThemeContext';
-import { User } from '@supabase/supabase-js';
-import {
-  SidebarProvider,
-  SidebarTrigger,
-  SidebarInset,
-} from '@/components/ui/sidebar';
-import { AppSidebar } from './AppSidebar';
 import { Settings } from './modules/Settings';
+import { HelpProvider } from '@/contexts/HelpContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface DashboardProps {
-  user: User;
+  userEmail?: string;
 }
 
-const DashboardContent = ({ user }: DashboardProps) => {
+export const Dashboard = ({ userEmail }: DashboardProps) => {
   const [activeTab, setActiveTab] = useState('overview');
-  const { showHelp, toggleHelp } = useHelp();
+  const [showHelp, setShowHelp] = useState(false);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const toggleHelp = () => {
+    setShowHelp(!showHelp);
+  };
+
+  const renderActiveTab = () => {
+    switch (activeTab) {
+      case 'overview':
+        return <Overview />;
+      case 'analytics':
+        return <Analytics />;
+      case 'smart-reviews':
+        return <SmartReviews />;
+      case 'pillars':
+        return <Pillars />;
+      case 'goals':
+        return <Goals />;
+      case 'projects':
+        return <Projects />;
+      case 'tasks':
+        return <Tasks />;
+      case 'habits':
+        return <Habits />;
+      case 'journals':
+        return <Journals />;
+      case 'knowledge':
+        return <KnowledgeVault />;
+      case 'reviews':
+        return <Reviews />;
+      case 'values':
+        return <ValuesVault />;
+      case 'settings':
+        return <Settings />;
+      default:
+        return <Overview />;
+    }
   };
 
   return (
-    <ThemeProvider>
+    <HelpProvider>
       <SidebarProvider>
-        <div className="min-h-screen flex w-full">
+        <div className="flex h-screen w-full">
           <AppSidebar 
-            activeTab={activeTab} 
+            activeTab={activeTab}
             setActiveTab={setActiveTab}
             showHelp={showHelp}
             toggleHelp={toggleHelp}
             onSignOut={handleSignOut}
-            userEmail={user.email}
+            userEmail={userEmail}
           />
-          
-          <SidebarInset>
-            <div className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-              <SidebarTrigger className="-ml-1" />
-              <div className="flex-1" />
-              <Toggle pressed={showHelp} onPressedChange={toggleHelp} aria-label="Toggle help" size="sm">
-                <HelpCircle className="h-4 w-4" />
-              </Toggle>
+          <main className="flex-1 overflow-auto">
+            <div className="container mx-auto py-6 px-6">
+              {renderActiveTab()}
             </div>
-            
-            <main className="flex-1 p-6">
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsContent value="overview">
-                  <Overview />
-                </TabsContent>
-                <TabsContent value="pillars">
-                  <Pillars />
-                </TabsContent>
-                <TabsContent value="goals">
-                  <Goals />
-                </TabsContent>
-                <TabsContent value="projects">
-                  <Projects />
-                </TabsContent>
-                <TabsContent value="tasks">
-                  <Tasks />
-                </TabsContent>
-                <TabsContent value="habits">
-                  <Habits />
-                </TabsContent>
-                <TabsContent value="journals">
-                  <Journals />
-                </TabsContent>
-                <TabsContent value="knowledge">
-                  <KnowledgeVault />
-                </TabsContent>
-                <TabsContent value="reviews">
-                  <Reviews />
-                </TabsContent>
-                <TabsContent value="values">
-                  <ValuesVault />
-                </TabsContent>
-                <TabsContent value="settings">
-                  <Settings />
-                </TabsContent>
-              </Tabs>
-            </main>
-          </SidebarInset>
+          </main>
         </div>
       </SidebarProvider>
-    </ThemeProvider>
-  );
-};
-
-export const Dashboard = ({ user }: DashboardProps) => {
-  return (
-    <HelpProvider>
-      <DashboardContent user={user} />
     </HelpProvider>
   );
 };
