@@ -791,6 +791,7 @@ export type Database = {
           status: string
           title: string
           tracking_period: number | null
+          type: string
           updated_at: string
           user_id: string
         }
@@ -803,6 +804,7 @@ export type Database = {
           status?: string
           title: string
           tracking_period?: number | null
+          type?: string
           updated_at?: string
           user_id: string
         }
@@ -815,6 +817,7 @@ export type Database = {
           status?: string
           title?: string
           tracking_period?: number | null
+          type?: string
           updated_at?: string
           user_id?: string
         }

@@ -3,12 +3,8 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { Plus, Zap, TrendingUp, Calendar } from 'lucide-react';
@@ -18,6 +14,21 @@ import { HabitCard } from './habits/HabitCard';
 import { HabitForm } from './habits/HabitForm';
 import { HabitAnalytics } from './habits/HabitAnalytics';
 import { HabitStreaks } from './habits/HabitStreaks';
+
+// Define the habit type
+interface Habit {
+  id: string;
+  user_id: string;
+  title: string;
+  description?: string;
+  frequency: string;
+  type: 'do' | 'dont';
+  status: string;
+  tracking_period: number;
+  goal_id?: string;
+  created_at: string;
+  updated_at: string;
+}
 
 export const Habits = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -38,7 +49,7 @@ export const Habits = () => {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data;
+      return data as Habit[];
     },
   });
 
@@ -88,7 +99,7 @@ export const Habits = () => {
   };
 
   // Separate habits into do's and don'ts
-  const doHabits = habits?.filter(habit => habit.type !== 'dont') || [];
+  const doHabits = habits?.filter(habit => habit.type === 'do') || [];
   const dontHabits = habits?.filter(habit => habit.type === 'dont') || [];
 
   // Calculate stats
@@ -177,7 +188,7 @@ export const Habits = () => {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <h3 className="text-xl font-semibold">Do's</h3>
-              <Badge variant="secondary">{doHabits.length} habits</Badge>
+              <span className="bg-secondary text-secondary-foreground px-2 py-1 rounded text-sm">{doHabits.length} habits</span>
             </div>
             {doHabits.length === 0 ? (
               <Card>
@@ -201,7 +212,7 @@ export const Habits = () => {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <h3 className="text-xl font-semibold">Don'ts</h3>
-              <Badge variant="secondary">{dontHabits.length} habits</Badge>
+              <span className="bg-secondary text-secondary-foreground px-2 py-1 rounded text-sm">{dontHabits.length} habits</span>
             </div>
             {dontHabits.length === 0 ? (
               <Card>
