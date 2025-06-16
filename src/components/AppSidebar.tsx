@@ -12,6 +12,7 @@ import {
   Building2,
   LogOut,
   User,
+  Settings,
 } from 'lucide-react';
 
 import {
@@ -80,6 +81,11 @@ const items = [
     title: 'Values',
     url: 'values',
     icon: Heart,
+  },
+  {
+    title: 'Settings',
+    url: 'settings',
+    icon: Settings,
   },
 ];
 
