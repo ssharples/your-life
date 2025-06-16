@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -24,6 +23,7 @@ import {
   SidebarInset,
 } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
+import { Settings } from './modules/Settings';
 
 interface DashboardProps {
   user: User;
@@ -90,6 +90,9 @@ const DashboardContent = ({ user }: DashboardProps) => {
                 </TabsContent>
                 <TabsContent value="values">
                   <ValuesVault />
+                </TabsContent>
+                <TabsContent value="settings">
+                  <Settings />
                 </TabsContent>
               </Tabs>
             </main>
