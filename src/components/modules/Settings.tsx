@@ -18,6 +18,8 @@ interface NotificationSettings {
   monthly_enabled: boolean;
   quarterly_enabled: boolean;
   annual_enabled: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export const Settings = () => {
@@ -43,7 +45,7 @@ export const Settings = () => {
         .single();
       
       if (error && error.code !== 'PGRST116') throw error;
-      return data;
+      return data as NotificationSettings | null;
     },
   });
 
@@ -105,7 +107,8 @@ export const Settings = () => {
     }
   };
 
-  const currentSettings = settings || {
+  const currentSettings: NotificationSettings = settings || {
+    user_id: '',
     notifications_enabled: false,
     daily_time: '09:00',
     weekly_enabled: true,

@@ -1181,6 +1181,45 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_settings: {
+        Row: {
+          annual_enabled: boolean
+          created_at: string
+          daily_time: string
+          id: string
+          monthly_enabled: boolean
+          notifications_enabled: boolean
+          quarterly_enabled: boolean
+          updated_at: string
+          user_id: string
+          weekly_enabled: boolean
+        }
+        Insert: {
+          annual_enabled?: boolean
+          created_at?: string
+          daily_time?: string
+          id?: string
+          monthly_enabled?: boolean
+          notifications_enabled?: boolean
+          quarterly_enabled?: boolean
+          updated_at?: string
+          user_id: string
+          weekly_enabled?: boolean
+        }
+        Update: {
+          annual_enabled?: boolean
+          created_at?: string
+          daily_time?: string
+          id?: string
+          monthly_enabled?: boolean
+          notifications_enabled?: boolean
+          quarterly_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+          weekly_enabled?: boolean
+        }
+        Relationships: []
+      }
       pillars: {
         Row: {
           created_at: string
