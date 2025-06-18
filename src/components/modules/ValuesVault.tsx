@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
-import { Plus, Heart, Star, Edit, Trash2 } from 'lucide-react';
+import { Plus, Heart, Star, Edit, Trash2, X } from 'lucide-react';
 import { ValuesGuide } from '@/components/guides/ValuesGuide';
 import { useHelp } from '@/contexts/HelpContext';
 
@@ -18,8 +19,8 @@ interface Value {
   value: string;
   description: string | null;
   importance_rating: number;
-  pillar_id: string | null;
   created_at: string;
+  connected_pillars?: Pillar[];
 }
 
 interface Pillar {
@@ -33,7 +34,7 @@ export const ValuesVault = () => {
   const [value, setValue] = useState('');
   const [description, setDescription] = useState('');
   const [importanceRating, setImportanceRating] = useState(5);
-  const [selectedPillarId, setSelectedPillarId] = useState<string>('no-pillar');
+  const [selectedPillarIds, setSelectedPillarIds] = useState<string[]>([]);
   const queryClient = useQueryClient();
   const { showHelp } = useHelp();
 
@@ -60,14 +61,34 @@ export const ValuesVault = () => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('Not authenticated');
       
-      const { data, error } = await supabase
+      // Get values
+      const { data: valuesData, error: valuesError } = await supabase
         .from('values_vault')
         .select('*')
         .eq('user_id', user.data.user.id)
         .order('importance_rating', { ascending: false });
       
-      if (error) throw error;
-      return data as Value[];
+      if (valuesError) throw valuesError;
+
+      // Get pillar connections for each value
+      const valuesWithPillars = await Promise.all(
+        valuesData.map(async (valueItem) => {
+          const { data: connections } = await supabase
+            .from('value_pillar_connections')
+            .select(`
+              pillar_id,
+              pillars (id, name)
+            `)
+            .eq('value_id', valueItem.id);
+
+          return {
+            ...valueItem,
+            connected_pillars: connections?.map(conn => conn.pillars).filter(Boolean) || []
+          };
+        })
+      );
+      
+      return valuesWithPillars as Value[];
     },
   });
 
@@ -76,31 +97,66 @@ export const ValuesVault = () => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('Not authenticated');
 
-      const dataToSave = {
-        ...valueData,
-        pillar_id: valueData.pillar_id === 'no-pillar' ? null : valueData.pillar_id
-      };
-
       if (editingValue) {
+        // Update the value
         const { data, error } = await supabase
           .from('values_vault')
-          .update(dataToSave)
+          .update({
+            value: valueData.value,
+            description: valueData.description,
+            importance_rating: valueData.importance_rating
+          })
           .eq('id', editingValue.id)
           .eq('user_id', user.data.user.id)
           .select();
         
         if (error) throw error;
+
+        // Remove existing pillar connections
+        await supabase
+          .from('value_pillar_connections')
+          .delete()
+          .eq('value_id', editingValue.id);
+
+        // Add new pillar connections
+        if (valueData.pillar_ids && valueData.pillar_ids.length > 0) {
+          const connections = valueData.pillar_ids.map((pillarId: string) => ({
+            value_id: editingValue.id,
+            pillar_id: pillarId
+          }));
+
+          await supabase
+            .from('value_pillar_connections')
+            .insert(connections);
+        }
+
         return data;
       } else {
+        // Create new value
         const { data, error } = await supabase
           .from('values_vault')
           .insert([{ 
-            ...dataToSave, 
+            value: valueData.value,
+            description: valueData.description,
+            importance_rating: valueData.importance_rating,
             user_id: user.data.user.id
           }])
           .select();
         
         if (error) throw error;
+
+        // Add pillar connections
+        if (valueData.pillar_ids && valueData.pillar_ids.length > 0 && data[0]) {
+          const connections = valueData.pillar_ids.map((pillarId: string) => ({
+            value_id: data[0].id,
+            pillar_id: pillarId
+          }));
+
+          await supabase
+            .from('value_pillar_connections')
+            .insert(connections);
+        }
+
         return data;
       }
     },
@@ -119,6 +175,12 @@ export const ValuesVault = () => {
     mutationFn: async (valueId: string) => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('Not authenticated');
+
+      // Delete pillar connections first (will be handled by CASCADE, but being explicit)
+      await supabase
+        .from('value_pillar_connections')
+        .delete()
+        .eq('value_id', valueId);
 
       const { error } = await supabase
         .from('values_vault')
@@ -139,7 +201,7 @@ export const ValuesVault = () => {
     setValue('');
     setDescription('');
     setImportanceRating(5);
-    setSelectedPillarId('no-pillar');
+    setSelectedPillarIds([]);
     setEditingValue(null);
     setIsDialogOpen(false);
   };
@@ -149,7 +211,7 @@ export const ValuesVault = () => {
     setValue(valueItem.value);
     setDescription(valueItem.description || '');
     setImportanceRating(valueItem.importance_rating);
-    setSelectedPillarId(valueItem.pillar_id || 'no-pillar');
+    setSelectedPillarIds(valueItem.connected_pillars?.map(p => p.id) || []);
     setIsDialogOpen(true);
   };
 
@@ -159,7 +221,7 @@ export const ValuesVault = () => {
       value, 
       description, 
       importance_rating: importanceRating,
-      pillar_id: selectedPillarId
+      pillar_ids: selectedPillarIds
     });
   };
 
@@ -177,9 +239,16 @@ export const ValuesVault = () => {
     return 'bg-gray-100 text-gray-800 border-gray-200';
   };
 
-  const getPillarName = (pillarId: string | null) => {
-    if (!pillarId) return 'Unassigned';
-    return pillars?.find(p => p.id === pillarId)?.name || 'Unknown Pillar';
+  const handlePillarSelection = (pillarId: string) => {
+    if (selectedPillarIds.includes(pillarId)) {
+      setSelectedPillarIds(selectedPillarIds.filter(id => id !== pillarId));
+    } else {
+      setSelectedPillarIds([...selectedPillarIds, pillarId]);
+    }
+  };
+
+  const removePillar = (pillarId: string) => {
+    setSelectedPillarIds(selectedPillarIds.filter(id => id !== pillarId));
   };
 
   return (
@@ -218,20 +287,40 @@ export const ValuesVault = () => {
                 rows={4}
               />
               <div className="space-y-2">
-                <label className="text-sm font-medium">Connected Pillar</label>
-                <Select value={selectedPillarId} onValueChange={setSelectedPillarId}>
+                <label className="text-sm font-medium">Connected Pillars</label>
+                <Select onValueChange={handlePillarSelection}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a pillar (optional)" />
+                    <SelectValue placeholder="Select pillars to connect" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="no-pillar">No pillar</SelectItem>
-                    {pillars?.map((pillar) => (
+                    {pillars?.filter(pillar => !selectedPillarIds.includes(pillar.id)).map((pillar) => (
                       <SelectItem key={pillar.id} value={pillar.id}>
                         {pillar.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {selectedPillarIds.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {selectedPillarIds.map((pillarId) => {
+                      const pillar = pillars?.find(p => p.id === pillarId);
+                      return pillar ? (
+                        <Badge key={pillarId} variant="secondary" className="flex items-center gap-1">
+                          {pillar.name}
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-3 w-3 p-0 hover:bg-transparent"
+                            onClick={() => removePillar(pillarId)}
+                          >
+                            <X className="h-2 w-2" />
+                          </Button>
+                        </Badge>
+                      ) : null;
+                    })}
+                  </div>
+                )}
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">
@@ -296,9 +385,19 @@ export const ValuesVault = () => {
                 </p>
               )}
               <div className="space-y-2">
-                <Badge variant="outline" className="text-xs">
-                  {getPillarName(valueItem.pillar_id)}
-                </Badge>
+                <div className="flex flex-wrap gap-1">
+                  {valueItem.connected_pillars && valueItem.connected_pillars.length > 0 ? (
+                    valueItem.connected_pillars.map((pillar) => (
+                      <Badge key={pillar.id} variant="outline" className="text-xs">
+                        {pillar.name}
+                      </Badge>
+                    ))
+                  ) : (
+                    <Badge variant="outline" className="text-xs">
+                      Unassigned
+                    </Badge>
+                  )}
+                </div>
                 <div className="text-xs text-muted-foreground">
                   Added: {new Date(valueItem.created_at).toLocaleDateString()}
                 </div>

@@ -1623,13 +1623,48 @@ export type Database = {
         }
         Relationships: []
       }
+      value_pillar_connections: {
+        Row: {
+          created_at: string
+          id: string
+          pillar_id: string
+          value_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          pillar_id: string
+          value_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          pillar_id?: string
+          value_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "value_pillar_connections_pillar_id_fkey"
+            columns: ["pillar_id"]
+            isOneToOne: false
+            referencedRelation: "pillars"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "value_pillar_connections_value_id_fkey"
+            columns: ["value_id"]
+            isOneToOne: false
+            referencedRelation: "values_vault"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       values_vault: {
         Row: {
           created_at: string
           description: string | null
           id: string
           importance_rating: number | null
-          pillar_id: string | null
           updated_at: string
           user_id: string
           value: string
@@ -1639,7 +1674,6 @@ export type Database = {
           description?: string | null
           id?: string
           importance_rating?: number | null
-          pillar_id?: string | null
           updated_at?: string
           user_id: string
           value: string
@@ -1649,20 +1683,11 @@ export type Database = {
           description?: string | null
           id?: string
           importance_rating?: number | null
-          pillar_id?: string | null
           updated_at?: string
           user_id?: string
           value?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "values_vault_pillar_id_fkey"
-            columns: ["pillar_id"]
-            isOneToOne: false
-            referencedRelation: "pillars"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       videos: {
         Row: {

@@ -21,12 +21,16 @@ export const usePillarsData = () => {
       // For each pillar, fetch values and their connected data
       const pillarsWithHierarchy = await Promise.all(
         pillars.map(async (pillar) => {
-          // Get values connected to this specific pillar
-          const { data: values } = await supabase
-            .from('values_vault')
-            .select('*')
-            .eq('user_id', user.data.user.id)
+          // Get values connected to this specific pillar through the junction table
+          const { data: valueConnections } = await supabase
+            .from('value_pillar_connections')
+            .select(`
+              value_id,
+              values_vault (*)
+            `)
             .eq('pillar_id', pillar.id);
+
+          const values = valueConnections?.map(conn => conn.values_vault).filter(Boolean) || [];
 
           // Get goals for this pillar
           const { data: goals } = await supabase
