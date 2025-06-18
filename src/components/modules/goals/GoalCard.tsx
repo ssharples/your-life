@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Target, Calendar, Edit, Trash2, Sparkles } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface Goal {
   id: string;
@@ -42,7 +43,16 @@ export const GoalCard = ({ goal, onUpdateStatus, onEdit, onDelete }: GoalCardPro
             <Target className="h-4 w-4 mr-2" />
             {goal.title}
             {goal.ai_enhanced && (
-              <Sparkles className="h-3 w-3 ml-2 text-blue-500" title="AI Enhanced" />
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Sparkles className="h-3 w-3 ml-2 text-blue-500" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>AI Enhanced</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             )}
           </CardTitle>
           <div className="flex items-center gap-2">
