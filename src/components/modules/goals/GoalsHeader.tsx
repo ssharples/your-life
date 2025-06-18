@@ -14,13 +14,17 @@ interface GoalsHeaderProps {
   isDialogOpen: boolean;
   setIsDialogOpen: (open: boolean) => void;
   onCreateGoal: (goalData: any) => void;
+  onCancel: () => void;
+  editingGoal?: any;
 }
 
 export const GoalsHeader = ({ 
   pillars, 
   isDialogOpen, 
   setIsDialogOpen, 
-  onCreateGoal 
+  onCreateGoal,
+  onCancel,
+  editingGoal
 }: GoalsHeaderProps) => {
   return (
     <div className="flex justify-between items-center">
@@ -37,12 +41,16 @@ export const GoalsHeader = ({
         </DialogTrigger>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Create a SMART Goal</DialogTitle>
+            <DialogTitle>
+              {editingGoal ? 'Edit SMART Goal' : 'Create a SMART Goal'}
+            </DialogTitle>
           </DialogHeader>
           <SmartGoalWizard
             pillars={pillars}
             onSubmit={onCreateGoal}
-            onCancel={() => setIsDialogOpen(false)}
+            onCancel={onCancel}
+            initialData={editingGoal}
+            isEditing={!!editingGoal}
           />
         </DialogContent>
       </Dialog>

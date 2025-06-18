@@ -1,69 +1,46 @@
 
 import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
 import { GoalsGuide } from '@/components/guides/GoalsGuide';
 import { useHelp } from '@/contexts/HelpContext';
 import { useGoalsData } from './goals/hooks/useGoalsData';
 import { usePillarsData } from './goals/hooks/usePillarsData';
+import { useGoalMutations } from './goals/hooks/useGoalMutations';
 import { GoalsHeader } from './goals/GoalsHeader';
 import { GoalsGrid } from './goals/GoalsGrid';
 
 export const Goals = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const queryClient = useQueryClient();
+  const [editingGoal, setEditingGoal] = useState(null);
   const { showHelp } = useHelp();
 
   const { data: goals } = useGoalsData();
   const { data: pillars } = usePillarsData();
-
-  const createGoal = useMutation({
-    mutationFn: async (newGoal: any) => {
-      const user = await supabase.auth.getUser();
-      if (!user.data.user) throw new Error('Not authenticated');
-
-      const { data, error } = await supabase
-        .from('goals')
-        .insert([{ 
-          ...newGoal, 
-          user_id: user.data.user.id
-        }])
-        .select();
-      
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['goals'] });
-      toast({ title: "Success", description: "SMART Goal created successfully!" });
-      setIsDialogOpen(false);
-    },
-  });
-
-  const updateGoalStatus = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const { data, error } = await supabase
-        .from('goals')
-        .update({ status })
-        .eq('id', id)
-        .select();
-      
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['goals'] });
-      toast({ title: "Success", description: "Goal updated successfully!" });
-    },
-  });
+  const { createOrUpdateGoal, updateGoalStatus, deleteGoal } = useGoalMutations();
 
   const handleCreateGoal = (goalData: any) => {
-    createGoal.mutate(goalData);
+    createOrUpdateGoal.mutate(goalData, {
+      onSuccess: () => setIsDialogOpen(false)
+    });
   };
 
   const handleUpdateStatus = (id: string, status: string) => {
     updateGoalStatus.mutate({ id, status });
+  };
+
+  const handleEditGoal = (goal: any) => {
+    setEditingGoal(goal);
+    setIsDialogOpen(true);
+  };
+
+  const handleDeleteGoal = (id: string) => {
+    if (confirm('Are you sure you want to delete this goal?')) {
+      deleteGoal.mutate(id);
+    }
+  };
+
+  const handleDialogClose = () => {
+    setIsDialogOpen(false);
+    setEditingGoal(null);
   };
 
   return (
@@ -75,11 +52,15 @@ export const Goals = () => {
         isDialogOpen={isDialogOpen}
         setIsDialogOpen={setIsDialogOpen}
         onCreateGoal={handleCreateGoal}
+        onCancel={handleDialogClose}
+        editingGoal={editingGoal}
       />
 
       <GoalsGrid
         goals={goals}
         onUpdateStatus={handleUpdateStatus}
+        onEdit={handleEditGoal}
+        onDelete={handleDeleteGoal}
       />
     </div>
   );

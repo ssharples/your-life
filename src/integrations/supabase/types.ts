@@ -695,6 +695,8 @@ export type Database = {
       }
       goals: {
         Row: {
+          ai_enhanced: boolean | null
+          ai_suggestions: Json | null
           created_at: string
           description: string | null
           id: string
@@ -708,6 +710,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          ai_enhanced?: boolean | null
+          ai_suggestions?: Json | null
           created_at?: string
           description?: string | null
           id?: string
@@ -721,6 +725,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          ai_enhanced?: boolean | null
+          ai_suggestions?: Json | null
           created_at?: string
           description?: string | null
           id?: string

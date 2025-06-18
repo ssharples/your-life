@@ -21,13 +21,37 @@ export const useGoalMutations = () => {
             type: goalData.type,
             priority: goalData.priority,
             pillar_id: goalData.pillar_id || null,
-            target_date: goalData.target_date || null
+            target_date: goalData.target_date || null,
+            ai_enhanced: goalData.ai_enhanced || false,
+            ai_suggestions: goalData.ai_suggestions || {}
           })
           .eq('id', goalData.id)
           .eq('user_id', user.data.user.id)
           .select();
         
         if (error) throw error;
+
+        // Handle value connections for edited goal
+        if (goalData.value_ids) {
+          // Remove existing connections
+          await supabase
+            .from('value_goal_connections')
+            .delete()
+            .eq('goal_id', goalData.id);
+
+          // Add new connections
+          if (goalData.value_ids.length > 0) {
+            const connections = goalData.value_ids.map((valueId: string) => ({
+              value_id: valueId,
+              goal_id: goalData.id
+            }));
+
+            await supabase
+              .from('value_goal_connections')
+              .insert(connections);
+          }
+        }
+
         return data;
       } else {
         // Create new goal
@@ -40,11 +64,26 @@ export const useGoalMutations = () => {
             priority: goalData.priority,
             user_id: user.data.user.id,
             pillar_id: goalData.pillar_id || null,
-            target_date: goalData.target_date || null
+            target_date: goalData.target_date || null,
+            ai_enhanced: goalData.ai_enhanced || false,
+            ai_suggestions: goalData.ai_suggestions || {}
           }])
           .select();
         
         if (error) throw error;
+
+        // Handle value connections for new goal
+        if (goalData.value_ids && goalData.value_ids.length > 0 && data[0]) {
+          const connections = goalData.value_ids.map((valueId: string) => ({
+            value_id: valueId,
+            goal_id: data[0].id
+          }));
+
+          await supabase
+            .from('value_goal_connections')
+            .insert(connections);
+        }
+
         return data;
       }
     },
@@ -80,6 +119,12 @@ export const useGoalMutations = () => {
     mutationFn: async (goalId: string) => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('Not authenticated');
+
+      // Delete value connections first
+      await supabase
+        .from('value_goal_connections')
+        .delete()
+        .eq('goal_id', goalId);
 
       const { error } = await supabase
         .from('goals')

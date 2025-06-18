@@ -7,17 +7,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { ChevronLeft, ChevronRight, Target, Calendar, Ruler, CheckCircle, Star } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Target, Calendar, Ruler, CheckCircle, Star, Sparkles, Loader2 } from 'lucide-react';
+import { useAIEnhancement, AIGoalSuggestions } from './hooks/useAIEnhancement';
+import { useValuesData } from '@/components/modules/values/hooks/useValuesData';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface Pillar {
   id: string;
   name: string;
 }
 
+interface Value {
+  id: string;
+  value: string;
+}
+
 interface SmartGoalWizardProps {
   pillars?: Pillar[];
   onSubmit: (goalData: any) => void;
   onCancel: () => void;
+  initialData?: any;
+  isEditing?: boolean;
 }
 
 const STEPS = [
@@ -28,20 +38,65 @@ const STEPS = [
   { key: 'timebound', title: 'Time-bound', icon: Calendar, description: 'When will you complete this goal?' },
 ];
 
-export const SmartGoalWizard = ({ pillars, onSubmit, onCancel }: SmartGoalWizardProps) => {
+export const SmartGoalWizard = ({ pillars, onSubmit, onCancel, initialData, isEditing = false }: SmartGoalWizardProps) => {
   const [currentStep, setCurrentStep] = useState(0);
+  const { data: values } = useValuesData();
+  const { enhanceGoal, isLoading: isAILoading } = useAIEnhancement();
+  
   const [goalData, setGoalData] = useState({
-    title: '',
-    description: '',
+    id: initialData?.id || '',
+    title: initialData?.title || '',
+    description: initialData?.description || '',
     specificDetails: '',
     measurementCriteria: '',
     achievabilityNotes: '',
     relevanceReason: '',
-    targetDate: '',
-    type: 'short-term' as 'short-term' | 'long-term',
-    priority: 3,
-    pillarId: ''
+    targetDate: initialData?.target_date || '',
+    type: (initialData?.type as 'short-term' | 'long-term') || 'short-term',
+    priority: initialData?.priority || 3,
+    pillarId: initialData?.pillar_id || '',
+    valueIds: [] as string[],
+    aiEnhanced: false,
+    aiSuggestions: {} as AIGoalSuggestions
   });
+
+  // Parse existing description for SMART components if editing
+  useState(() => {
+    if (isEditing && initialData?.description) {
+      const description = initialData.description;
+      const specificMatch = description.match(/Specific: ([^\n]+)/);
+      const measurableMatch = description.match(/Measurable: ([^\n]+)/);
+      const achievableMatch = description.match(/Achievable: ([^\n]+)/);
+      const relevantMatch = description.match(/Relevant: ([^\n]+)/);
+      
+      if (specificMatch || measurableMatch || achievableMatch || relevantMatch) {
+        setGoalData(prev => ({
+          ...prev,
+          specificDetails: specificMatch?.[1] || '',
+          measurementCriteria: measurableMatch?.[1] || '',
+          achievabilityNotes: achievableMatch?.[1] || '',
+          relevanceReason: relevantMatch?.[1] || ''
+        }));
+      }
+    }
+  });
+
+  const handleAIEnhance = async () => {
+    if (!goalData.title.trim()) return;
+    
+    const suggestions = await enhanceGoal(goalData.title);
+    if (suggestions) {
+      setGoalData(prev => ({
+        ...prev,
+        specificDetails: suggestions.specificDetails,
+        measurementCriteria: suggestions.measurementCriteria,
+        achievabilityNotes: suggestions.achievabilityNotes,
+        relevanceReason: suggestions.relevanceReason,
+        aiEnhanced: true,
+        aiSuggestions: suggestions
+      }));
+    }
+  };
 
   const currentStepData = STEPS[currentStep];
   const progress = ((currentStep + 1) / STEPS.length) * 100;
@@ -50,14 +105,18 @@ export const SmartGoalWizard = ({ pillars, onSubmit, onCancel }: SmartGoalWizard
     if (currentStep < STEPS.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Final step - submit the goal
       const finalGoalData = {
+        ...(isEditing && goalData.id ? { id: goalData.id } : {}),
         title: goalData.title,
         description: buildSmartDescription(),
         type: goalData.type,
         priority: goalData.priority,
         target_date: goalData.targetDate,
-        pillar_id: goalData.pillarId || null
+        pillar_id: goalData.pillarId || null,
+        value_ids: goalData.valueIds,
+        ai_enhanced: goalData.aiEnhanced,
+        ai_suggestions: goalData.aiSuggestions,
+        isEditing
       };
       onSubmit(finalGoalData);
     }
@@ -90,6 +149,15 @@ export const SmartGoalWizard = ({ pillars, onSubmit, onCancel }: SmartGoalWizard
     }
   };
 
+  const handleValueToggle = (valueId: string) => {
+    setGoalData(prev => ({
+      ...prev,
+      valueIds: prev.valueIds.includes(valueId)
+        ? prev.valueIds.filter(id => id !== valueId)
+        : [...prev.valueIds, valueId]
+    }));
+  };
+
   const renderStepContent = () => {
     const Icon = currentStepData.icon;
     
@@ -102,18 +170,44 @@ export const SmartGoalWizard = ({ pillars, onSubmit, onCancel }: SmartGoalWizard
               <h3 className="text-xl font-semibold">Be Specific</h3>
               <p className="text-muted-foreground">What exactly do you want to accomplish?</p>
             </div>
-            <Input
-              placeholder="Goal title (e.g., 'Run a 5K marathon')"
-              value={goalData.title}
-              onChange={(e) => setGoalData({ ...goalData, title: e.target.value })}
-              className="text-lg"
-            />
-            <Textarea
-              placeholder="Describe your goal in detail. Be as specific as possible about what success looks like..."
-              value={goalData.specificDetails}
-              onChange={(e) => setGoalData({ ...goalData, specificDetails: e.target.value })}
-              rows={4}
-            />
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Goal title (e.g., 'Run a 5K marathon')"
+                  value={goalData.title}
+                  onChange={(e) => setGoalData({ ...goalData, title: e.target.value })}
+                  className="text-lg flex-1"
+                />
+                <Button 
+                  type="button"
+                  variant="outline"
+                  onClick={handleAIEnhance}
+                  disabled={!goalData.title.trim() || isAILoading}
+                  className="flex items-center gap-2"
+                >
+                  {isAILoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-4 w-4" />
+                  )}
+                  AI Enhance
+                </Button>
+              </div>
+              <Textarea
+                placeholder="Describe your goal in detail. Be as specific as possible about what success looks like..."
+                value={goalData.specificDetails}
+                onChange={(e) => setGoalData({ ...goalData, specificDetails: e.target.value })}
+                rows={4}
+              />
+              {goalData.aiEnhanced && (
+                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Sparkles className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm font-medium text-blue-800">AI Enhanced</span>
+                  </div>
+                </div>
+              )}
+            </div>
             <div className="bg-blue-50 p-4 rounded-lg">
               <p className="text-sm text-blue-800">
                 <strong>Tip:</strong> Instead of "get fit", try "run a 5K in under 30 minutes" or "lose 15 pounds through diet and exercise"
@@ -186,6 +280,28 @@ export const SmartGoalWizard = ({ pillars, onSubmit, onCancel }: SmartGoalWizard
                 ))}
               </SelectContent>
             </Select>
+            
+            <div className="space-y-3">
+              <label className="text-sm font-medium">Connect to Values</label>
+              <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
+                {values?.map((value) => (
+                  <div key={value.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={value.id}
+                      checked={goalData.valueIds.includes(value.id)}
+                      onCheckedChange={() => handleValueToggle(value.id)}
+                    />
+                    <label
+                      htmlFor={value.id}
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      {value.value}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <Textarea
               placeholder="Explain why this goal matters to you and how it connects to your values or long-term vision..."
               value={goalData.relevanceReason}
@@ -264,7 +380,7 @@ export const SmartGoalWizard = ({ pillars, onSubmit, onCancel }: SmartGoalWizard
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Target className="h-5 w-5" />
-                SMART Goal Creator
+                {isEditing ? 'Edit SMART Goal' : 'SMART Goal Creator'}
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
                 Step {currentStep + 1} of {STEPS.length}: {currentStepData.title}
@@ -293,7 +409,7 @@ export const SmartGoalWizard = ({ pillars, onSubmit, onCancel }: SmartGoalWizard
               disabled={!isStepValid()}
               className="flex items-center gap-2"
             >
-              {currentStep === STEPS.length - 1 ? 'Create Goal' : 'Next'}
+              {currentStep === STEPS.length - 1 ? (isEditing ? 'Update Goal' : 'Create Goal') : 'Next'}
               {currentStep < STEPS.length - 1 && <ChevronRight className="h-4 w-4" />}
             </Button>
           </div>

@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Target, Calendar } from 'lucide-react';
+import { Target, Calendar, Edit, Trash2, Sparkles } from 'lucide-react';
 
 interface Goal {
   id: string;
@@ -12,15 +12,18 @@ interface Goal {
   type: string;
   priority: number;
   target_date?: string;
+  ai_enhanced?: boolean;
   pillars?: { name: string };
 }
 
 interface GoalCardProps {
   goal: Goal;
   onUpdateStatus: (id: string, status: string) => void;
+  onEdit: (goal: Goal) => void;
+  onDelete: (id: string) => void;
 }
 
-export const GoalCard = ({ goal, onUpdateStatus }: GoalCardProps) => {
+export const GoalCard = ({ goal, onUpdateStatus, onEdit, onDelete }: GoalCardProps) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return 'bg-green-100 text-green-800';
@@ -38,10 +41,29 @@ export const GoalCard = ({ goal, onUpdateStatus }: GoalCardProps) => {
           <CardTitle className="text-lg flex items-center">
             <Target className="h-4 w-4 mr-2" />
             {goal.title}
+            {goal.ai_enhanced && (
+              <Sparkles className="h-3 w-3 ml-2 text-blue-500" title="AI Enhanced" />
+            )}
           </CardTitle>
-          <Badge className={getStatusColor(goal.status)}>
-            {goal.status}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge className={getStatusColor(goal.status)}>
+              {goal.status}
+            </Badge>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => onEdit(goal)}
+            >
+              <Edit className="h-3 w-3" />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => onDelete(goal.id)}
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </div>
         </div>
         <div className="flex flex-wrap gap-2">
           <Badge variant="outline">{goal.type}</Badge>
