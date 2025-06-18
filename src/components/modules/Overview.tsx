@@ -1,11 +1,27 @@
 
+import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { CalendarDays, Target, BookOpen, CheckCircle } from 'lucide-react';
+import { QuickHabitsWidget } from './overview/QuickHabitsWidget';
+import { ActiveProjectsWidget } from './overview/ActiveProjectsWidget';
+import { ChristianQuoteWidget } from './overview/ChristianQuoteWidget';
+import { initializeEssentialHabits } from '@/utils/essentialHabits';
 
 export const Overview = () => {
+  // Initialize essential habits when component mounts
+  useEffect(() => {
+    const initHabits = async () => {
+      const user = await supabase.auth.getUser();
+      if (user.data.user) {
+        await initializeEssentialHabits(user.data.user.id);
+      }
+    };
+    initHabits();
+  }, []);
+
   const { data: stats } = useQuery({
     queryKey: ['overview-stats'],
     queryFn: async () => {
@@ -44,6 +60,13 @@ export const Overview = () => {
         <p className="text-muted-foreground">Your life management dashboard at a glance</p>
       </div>
 
+      {/* Quick Actions Row */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <QuickHabitsWidget />
+        <ChristianQuoteWidget />
+      </div>
+
+      {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -94,6 +117,7 @@ export const Overview = () => {
         </Card>
       </div>
 
+      {/* Progress Charts */}
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
@@ -121,6 +145,9 @@ export const Overview = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Active Projects */}
+      <ActiveProjectsWidget />
     </div>
   );
 };
