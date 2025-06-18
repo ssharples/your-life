@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,11 +8,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
-import { Plus, Building2, BarChart3 } from 'lucide-react';
+import { Plus, Building2, BarChart3, TrendingUp } from 'lucide-react';
 import { PillarsGuide } from '@/components/guides/PillarsGuide';
 import { useHelp } from '@/contexts/HelpContext';
 import { PillarHierarchy } from './pillars/PillarHierarchy';
 import { PillarStats } from './pillars/PillarStats';
+import { PipelineVisualization } from './pillars/PipelineVisualization';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export const Pillars = () => {
