@@ -1,26 +1,19 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { Plus, Target, Calendar } from 'lucide-react';
 import { GoalsGuide } from '@/components/guides/GoalsGuide';
+import { SmartGoalWizard } from './goals/SmartGoalWizard';
 import { useHelp } from '@/contexts/HelpContext';
 
 export const Goals = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [type, setType] = useState<'short-term' | 'long-term'>('short-term');
-  const [targetDate, setTargetDate] = useState('');
-  const [priority, setPriority] = useState(3);
-  const [pillarId, setPillarId] = useState('');
   const queryClient = useQueryClient();
   const { showHelp } = useHelp();
 
@@ -69,9 +62,7 @@ export const Goals = () => {
         .from('goals')
         .insert([{ 
           ...newGoal, 
-          user_id: user.data.user.id,
-          pillar_id: pillarId || null,
-          target_date: targetDate || null
+          user_id: user.data.user.id
         }])
         .select();
       
@@ -80,8 +71,8 @@ export const Goals = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['goals'] });
-      toast({ title: "Success", description: "Goal created successfully!" });
-      resetForm();
+      toast({ title: "Success", description: "SMART Goal created successfully!" });
+      setIsDialogOpen(false);
     },
   });
 
@@ -102,19 +93,8 @@ export const Goals = () => {
     },
   });
 
-  const resetForm = () => {
-    setTitle('');
-    setDescription('');
-    setType('short-term');
-    setTargetDate('');
-    setPriority(3);
-    setPillarId('');
-    setIsDialogOpen(false);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    createGoal.mutate({ title, description, type, priority });
+  const handleCreateGoal = (goalData: any) => {
+    createGoal.mutate(goalData);
   };
 
   const getStatusColor = (status: string) => {
@@ -134,72 +114,24 @@ export const Goals = () => {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Goals</h2>
-          <p className="text-muted-foreground">Track your short-term and long-term objectives</p>
+          <p className="text-muted-foreground">Create SMART goals to achieve your objectives</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => resetForm()}>
+            <Button>
               <Plus className="h-4 w-4 mr-2" />
-              Add Goal
+              Add SMART Goal
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Create New Goal</DialogTitle>
+              <DialogTitle>Create a SMART Goal</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <Input
-                placeholder="Goal title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
-              <Textarea
-                placeholder="Description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-              <Select value={type} onValueChange={(value: 'short-term' | 'long-term') => setType(value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select goal type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="short-term">Short-term</SelectItem>
-                  <SelectItem value="long-term">Long-term</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={pillarId} onValueChange={setPillarId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select pillar (optional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {pillars?.map((pillar) => (
-                    <SelectItem key={pillar.id} value={pillar.id}>
-                      {pillar.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Input
-                type="date"
-                placeholder="Target date"
-                value={targetDate}
-                onChange={(e) => setTargetDate(e.target.value)}
-              />
-              <Select value={priority.toString()} onValueChange={(value) => setPriority(parseInt(value))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Priority" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1 - Highest</SelectItem>
-                  <SelectItem value="2">2 - High</SelectItem>
-                  <SelectItem value="3">3 - Medium</SelectItem>
-                  <SelectItem value="4">4 - Low</SelectItem>
-                  <SelectItem value="5">5 - Lowest</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button type="submit" className="w-full">Create Goal</Button>
-            </form>
+            <SmartGoalWizard
+              pillars={pillars}
+              onSubmit={handleCreateGoal}
+              onCancel={() => setIsDialogOpen(false)}
+            />
           </DialogContent>
         </Dialog>
       </div>
@@ -227,15 +159,17 @@ export const Goals = () => {
             </CardHeader>
             <CardContent>
               {goal.description && (
-                <p className="text-sm text-muted-foreground mb-2">{goal.description}</p>
+                <div className="text-sm text-muted-foreground mb-2 whitespace-pre-line">
+                  {goal.description}
+                </div>
               )}
               {goal.target_date && (
-                <div className="flex items-center text-sm text-muted-foreground">
+                <div className="flex items-center text-sm text-muted-foreground mb-4">
                   <Calendar className="h-3 w-3 mr-1" />
                   Target: {new Date(goal.target_date).toLocaleDateString()}
                 </div>
               )}
-              <div className="flex space-x-2 mt-4">
+              <div className="flex space-x-2">
                 {goal.status !== 'completed' && (
                   <Button
                     size="sm"
