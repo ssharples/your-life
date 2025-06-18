@@ -26,21 +26,21 @@ export const useValueMutations = () => {
         
         if (error) throw error;
 
-        // Remove existing pillar connections
+        // Remove existing goal connections
         await supabase
-          .from('value_pillar_connections')
+          .from('value_goal_connections')
           .delete()
           .eq('value_id', valueData.id);
 
-        // Add new pillar connections
-        if (valueData.pillar_ids && valueData.pillar_ids.length > 0) {
-          const connections = valueData.pillar_ids.map((pillarId: string) => ({
+        // Add new goal connections
+        if (valueData.goal_ids && valueData.goal_ids.length > 0) {
+          const connections = valueData.goal_ids.map((goalId: string) => ({
             value_id: valueData.id,
-            pillar_id: pillarId
+            goal_id: goalId
           }));
 
           await supabase
-            .from('value_pillar_connections')
+            .from('value_goal_connections')
             .insert(connections);
         }
 
@@ -59,15 +59,15 @@ export const useValueMutations = () => {
         
         if (error) throw error;
 
-        // Add pillar connections
-        if (valueData.pillar_ids && valueData.pillar_ids.length > 0 && data[0]) {
-          const connections = valueData.pillar_ids.map((pillarId: string) => ({
+        // Add goal connections
+        if (valueData.goal_ids && valueData.goal_ids.length > 0 && data[0]) {
+          const connections = valueData.goal_ids.map((goalId: string) => ({
             value_id: data[0].id,
-            pillar_id: pillarId
+            goal_id: goalId
           }));
 
           await supabase
-            .from('value_pillar_connections')
+            .from('value_goal_connections')
             .insert(connections);
         }
 
@@ -76,6 +76,7 @@ export const useValueMutations = () => {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['values-vault'] });
+      queryClient.invalidateQueries({ queryKey: ['goals'] });
       queryClient.invalidateQueries({ queryKey: ['pillars-hierarchy'] });
       toast({ 
         title: "Success", 
@@ -89,9 +90,9 @@ export const useValueMutations = () => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('Not authenticated');
 
-      // Delete pillar connections first (will be handled by CASCADE, but being explicit)
+      // Delete goal connections first (will be handled by CASCADE, but being explicit)
       await supabase
-        .from('value_pillar_connections')
+        .from('value_goal_connections')
         .delete()
         .eq('value_id', valueId);
 
@@ -105,6 +106,7 @@ export const useValueMutations = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['values-vault'] });
+      queryClient.invalidateQueries({ queryKey: ['goals'] });
       queryClient.invalidateQueries({ queryKey: ['pillars-hierarchy'] });
       toast({ title: "Success", description: "Value deleted successfully!" });
     },

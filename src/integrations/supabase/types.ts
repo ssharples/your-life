@@ -1623,35 +1623,35 @@ export type Database = {
         }
         Relationships: []
       }
-      value_pillar_connections: {
+      value_goal_connections: {
         Row: {
           created_at: string
+          goal_id: string
           id: string
-          pillar_id: string
           value_id: string
         }
         Insert: {
           created_at?: string
+          goal_id: string
           id?: string
-          pillar_id: string
           value_id: string
         }
         Update: {
           created_at?: string
+          goal_id?: string
           id?: string
-          pillar_id?: string
           value_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "value_pillar_connections_pillar_id_fkey"
-            columns: ["pillar_id"]
+            foreignKeyName: "value_goal_connections_goal_id_fkey"
+            columns: ["goal_id"]
             isOneToOne: false
-            referencedRelation: "pillars"
+            referencedRelation: "goals"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "value_pillar_connections_value_id_fkey"
+            foreignKeyName: "value_goal_connections_value_id_fkey"
             columns: ["value_id"]
             isOneToOne: false
             referencedRelation: "values_vault"

@@ -7,9 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
 
-interface Pillar {
+interface Goal {
   id: string;
-  name: string;
+  title: string;
 }
 
 interface ValueFormProps {
@@ -19,9 +19,9 @@ interface ValueFormProps {
   setDescription: (description: string) => void;
   importanceRating: number;
   setImportanceRating: (rating: number) => void;
-  selectedPillarIds: string[];
-  setSelectedPillarIds: (ids: string[]) => void;
-  pillars?: Pillar[];
+  selectedGoalIds: string[];
+  setSelectedGoalIds: (ids: string[]) => void;
+  goals?: Goal[];
   onSubmit: (e: React.FormEvent) => void;
   isEditing: boolean;
 }
@@ -33,22 +33,22 @@ export const ValueForm = ({
   setDescription,
   importanceRating,
   setImportanceRating,
-  selectedPillarIds,
-  setSelectedPillarIds,
-  pillars,
+  selectedGoalIds,
+  setSelectedGoalIds,
+  goals,
   onSubmit,
   isEditing
 }: ValueFormProps) => {
-  const handlePillarSelection = (pillarId: string) => {
-    if (selectedPillarIds.includes(pillarId)) {
-      setSelectedPillarIds(selectedPillarIds.filter(id => id !== pillarId));
+  const handleGoalSelection = (goalId: string) => {
+    if (selectedGoalIds.includes(goalId)) {
+      setSelectedGoalIds(selectedGoalIds.filter(id => id !== goalId));
     } else {
-      setSelectedPillarIds([...selectedPillarIds, pillarId]);
+      setSelectedGoalIds([...selectedGoalIds, goalId]);
     }
   };
 
-  const removePillar = (pillarId: string) => {
-    setSelectedPillarIds(selectedPillarIds.filter(id => id !== pillarId));
+  const removeGoal = (goalId: string) => {
+    setSelectedGoalIds(selectedGoalIds.filter(id => id !== goalId));
   };
 
   return (
@@ -66,32 +66,32 @@ export const ValueForm = ({
         rows={4}
       />
       <div className="space-y-2">
-        <label className="text-sm font-medium">Connected Pillars</label>
-        <Select onValueChange={handlePillarSelection}>
+        <label className="text-sm font-medium">Connected Goals</label>
+        <Select onValueChange={handleGoalSelection}>
           <SelectTrigger>
-            <SelectValue placeholder="Select pillars to connect" />
+            <SelectValue placeholder="Select goals to connect" />
           </SelectTrigger>
           <SelectContent>
-            {pillars?.filter(pillar => !selectedPillarIds.includes(pillar.id)).map((pillar) => (
-              <SelectItem key={pillar.id} value={pillar.id}>
-                {pillar.name}
+            {goals?.filter(goal => !selectedGoalIds.includes(goal.id)).map((goal) => (
+              <SelectItem key={goal.id} value={goal.id}>
+                {goal.title}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        {selectedPillarIds.length > 0 && (
+        {selectedGoalIds.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-2">
-            {selectedPillarIds.map((pillarId) => {
-              const pillar = pillars?.find(p => p.id === pillarId);
-              return pillar ? (
-                <Badge key={pillarId} variant="secondary" className="flex items-center gap-1">
-                  {pillar.name}
+            {selectedGoalIds.map((goalId) => {
+              const goal = goals?.find(g => g.id === goalId);
+              return goal ? (
+                <Badge key={goalId} variant="secondary" className="flex items-center gap-1">
+                  {goal.title}
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
                     className="h-3 w-3 p-0 hover:bg-transparent"
-                    onClick={() => removePillar(pillarId)}
+                    onClick={() => removeGoal(goalId)}
                   >
                     <X className="h-2 w-2" />
                   </Button>

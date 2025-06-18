@@ -9,7 +9,7 @@ import { ValueForm } from './values/ValueForm';
 import { ValueCard } from './values/ValueCard';
 import { ValueEmptyState } from './values/ValueEmptyState';
 import { useValuesData } from './values/hooks/useValuesData';
-import { usePillarsData } from './values/hooks/usePillarsData';
+import { useGoalsData } from './values/hooks/useGoalsData';
 import { useValueMutations } from './values/hooks/useValueMutations';
 import type { Value } from './values/hooks/useValuesData';
 
@@ -19,10 +19,10 @@ export const ValuesVault = () => {
   const [value, setValue] = useState('');
   const [description, setDescription] = useState('');
   const [importanceRating, setImportanceRating] = useState(5);
-  const [selectedPillarIds, setSelectedPillarIds] = useState<string[]>([]);
+  const [selectedGoalIds, setSelectedGoalIds] = useState<string[]>([]);
   const { showHelp } = useHelp();
 
-  const { data: pillars } = usePillarsData();
+  const { data: goals } = useGoalsData();
   const { data: values } = useValuesData();
   const { createOrUpdateValue, deleteValue } = useValueMutations();
 
@@ -30,7 +30,7 @@ export const ValuesVault = () => {
     setValue('');
     setDescription('');
     setImportanceRating(5);
-    setSelectedPillarIds([]);
+    setSelectedGoalIds([]);
     setEditingValue(null);
     setIsDialogOpen(false);
   };
@@ -40,7 +40,7 @@ export const ValuesVault = () => {
     setValue(valueItem.value);
     setDescription(valueItem.description || '');
     setImportanceRating(valueItem.importance_rating);
-    setSelectedPillarIds(valueItem.connected_pillars?.map(p => p.id) || []);
+    setSelectedGoalIds(valueItem.connected_goals?.map(g => g.id) || []);
     setIsDialogOpen(true);
   };
 
@@ -51,7 +51,7 @@ export const ValuesVault = () => {
       value, 
       description, 
       importance_rating: importanceRating,
-      pillar_ids: selectedPillarIds,
+      goal_ids: selectedGoalIds,
       isEditing: !!editingValue
     });
     resetForm();
@@ -92,9 +92,9 @@ export const ValuesVault = () => {
               setDescription={setDescription}
               importanceRating={importanceRating}
               setImportanceRating={setImportanceRating}
-              selectedPillarIds={selectedPillarIds}
-              setSelectedPillarIds={setSelectedPillarIds}
-              pillars={pillars}
+              selectedGoalIds={selectedGoalIds}
+              setSelectedGoalIds={setSelectedGoalIds}
+              goals={goals}
               onSubmit={handleSubmit}
               isEditing={!!editingValue}
             />

@@ -5,9 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Heart, Star, Edit, Trash2 } from 'lucide-react';
 import { getImportanceColor } from './utils';
 
-interface Pillar {
+interface Goal {
   id: string;
-  name: string;
+  title: string;
 }
 
 interface Value {
@@ -16,7 +16,7 @@ interface Value {
   description: string | null;
   importance_rating: number;
   created_at: string;
-  connected_pillars?: Pillar[];
+  connected_goals?: Goal[];
 }
 
 interface ValueCardProps {
@@ -64,15 +64,15 @@ export const ValueCard = ({ value, onEdit, onDelete }: ValueCardProps) => {
         )}
         <div className="space-y-2">
           <div className="flex flex-wrap gap-1">
-            {value.connected_pillars && value.connected_pillars.length > 0 ? (
-              value.connected_pillars.map((pillar) => (
-                <Badge key={pillar.id} variant="outline" className="text-xs">
-                  {pillar.name}
+            {value.connected_goals && value.connected_goals.length > 0 ? (
+              value.connected_goals.map((goal) => (
+                <Badge key={goal.id} variant="outline" className="text-xs">
+                  {goal.title}
                 </Badge>
               ))
             ) : (
               <Badge variant="outline" className="text-xs">
-                Unassigned
+                No connected goals
               </Badge>
             )}
           </div>

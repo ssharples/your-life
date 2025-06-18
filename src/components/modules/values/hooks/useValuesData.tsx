@@ -8,9 +8,9 @@ export interface Value {
   description: string | null;
   importance_rating: number;
   created_at: string;
-  connected_pillars?: Array<{
+  connected_goals?: Array<{
     id: string;
-    name: string;
+    title: string;
   }>;
 }
 
@@ -30,25 +30,25 @@ export const useValuesData = () => {
       
       if (valuesError) throw valuesError;
 
-      // Get pillar connections for each value
-      const valuesWithPillars = await Promise.all(
+      // Get goal connections for each value
+      const valuesWithGoals = await Promise.all(
         valuesData.map(async (valueItem) => {
           const { data: connections } = await supabase
-            .from('value_pillar_connections')
+            .from('value_goal_connections')
             .select(`
-              pillar_id,
-              pillars (id, name)
+              goal_id,
+              goals (id, title)
             `)
             .eq('value_id', valueItem.id);
 
           return {
             ...valueItem,
-            connected_pillars: connections?.map(conn => conn.pillars).filter(Boolean) || []
+            connected_goals: connections?.map(conn => conn.goals).filter(Boolean) || []
           };
         })
       );
       
-      return valuesWithPillars as Value[];
+      return valuesWithGoals as Value[];
     },
   });
 };
