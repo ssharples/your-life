@@ -885,6 +885,21 @@ export type Database = {
         }
         Relationships: []
       }
+      KJV_Bible: {
+        Row: {
+          created_at: string
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+        }
+        Relationships: []
+      }
       knowledge_vault: {
         Row: {
           content: string

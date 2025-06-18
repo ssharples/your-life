@@ -39,7 +39,7 @@ const Index = () => {
     return <Auth />;
   }
 
-  return <Dashboard user={user} />;
+  return <Dashboard userEmail={user.email} />;
 };
 
 export default Index;
