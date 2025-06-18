@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,9 +8,12 @@ import { CalendarDays, Target, BookOpen, CheckCircle } from 'lucide-react';
 import { QuickHabitsWidget } from './overview/QuickHabitsWidget';
 import { ActiveProjectsWidget } from './overview/ActiveProjectsWidget';
 import { ChristianQuoteWidget } from './overview/ChristianQuoteWidget';
+import { GuidedReview } from './reviews/GuidedReview';
 import { initializeEssentialHabits } from '@/utils/essentialHabits';
 
 export const Overview = () => {
+  const [showGuidedReview, setShowGuidedReview] = useState(false);
+
   // Initialize essential habits when component mounts
   useEffect(() => {
     const initHabits = async () => {
@@ -53,6 +56,20 @@ export const Overview = () => {
     },
   });
 
+  const handleStartReview = () => {
+    setShowGuidedReview(true);
+  };
+
+  if (showGuidedReview) {
+    return (
+      <GuidedReview 
+        reviewType="daily"
+        onComplete={() => setShowGuidedReview(false)}
+        onCancel={() => setShowGuidedReview(false)}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -62,7 +79,7 @@ export const Overview = () => {
 
       {/* Quick Actions Row */}
       <div className="grid gap-6 md:grid-cols-2">
-        <QuickHabitsWidget />
+        <QuickHabitsWidget onStartReview={handleStartReview} />
         <ChristianQuoteWidget />
       </div>
 
