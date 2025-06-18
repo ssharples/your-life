@@ -21,7 +21,14 @@ export const usePillarsData = () => {
       // For each pillar, fetch values and their connected data
       const pillarsWithHierarchy = await Promise.all(
         pillars.map(async (pillar) => {
-          // Get values for this pillar (connected through goals)
+          // Get values connected to this specific pillar
+          const { data: values } = await supabase
+            .from('values_vault')
+            .select('*')
+            .eq('user_id', user.data.user.id)
+            .eq('pillar_id', pillar.id);
+
+          // Get goals for this pillar
           const { data: goals } = await supabase
             .from('goals')
             .select(`
@@ -32,22 +39,12 @@ export const usePillarsData = () => {
             .eq('user_id', user.data.user.id)
             .eq('pillar_id', pillar.id);
 
-          // Get values connected to these goals
-          const { data: values } = await supabase
-            .from('values_vault')
-            .select('*')
-            .eq('user_id', user.data.user.id);
-
-          // Create a map of values with their connected goals
+          // Create values with their connected goals
           const valuesWithGoals = values?.map(value => ({
             id: value.id,
             title: value.value, // Map 'value' field to 'title'
             description: value.description,
-            goals: goals?.filter(goal => {
-              // For now, we'll show all goals under each value
-              // In a real app, you might want a direct value-goal relationship
-              return true;
-            }).map(goal => ({
+            goals: goals?.map(goal => ({
               ...goal,
               habits: goal.habits || [],
               projects: (goal.los_projects || []).map((project: any) => ({

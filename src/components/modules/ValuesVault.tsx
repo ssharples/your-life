@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,17 +10,50 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
-import { Plus, Heart, Star } from 'lucide-react';
+import { Plus, Heart, Star, Edit, Trash2 } from 'lucide-react';
 import { ValuesGuide } from '@/components/guides/ValuesGuide';
 import { useHelp } from '@/contexts/HelpContext';
 
+interface Value {
+  id: string;
+  value: string;
+  description: string | null;
+  importance_rating: number;
+  pillar_id: string | null;
+  created_at: string;
+}
+
+interface Pillar {
+  id: string;
+  name: string;
+}
+
 export const ValuesVault = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingValue, setEditingValue] = useState<Value | null>(null);
   const [value, setValue] = useState('');
   const [description, setDescription] = useState('');
   const [importanceRating, setImportanceRating] = useState(5);
+  const [selectedPillarId, setSelectedPillarId] = useState<string>('');
   const queryClient = useQueryClient();
   const { showHelp } = useHelp();
+
+  const { data: pillars } = useQuery({
+    queryKey: ['pillars'],
+    queryFn: async () => {
+      const user = await supabase.auth.getUser();
+      if (!user.data.user) throw new Error('Not authenticated');
+      
+      const { data, error } = await supabase
+        .from('pillars')
+        .select('id, name')
+        .eq('user_id', user.data.user.id)
+        .order('name');
+      
+      if (error) throw error;
+      return data as Pillar[];
+    },
+  });
 
   const { data: values } = useQuery({
     queryKey: ['values-vault'],
@@ -34,31 +68,66 @@ export const ValuesVault = () => {
         .order('importance_rating', { ascending: false });
       
       if (error) throw error;
-      return data;
+      return data as Value[];
     },
   });
 
-  const createValue = useMutation({
-    mutationFn: async (newValue: any) => {
+  const createOrUpdateValue = useMutation({
+    mutationFn: async (valueData: any) => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('Not authenticated');
 
-      const { data, error } = await supabase
-        .from('values_vault')
-        .insert([{ 
-          ...newValue, 
-          user_id: user.data.user.id,
-          importance_rating: importanceRating
-        }])
-        .select();
-      
-      if (error) throw error;
-      return data;
+      if (editingValue) {
+        const { data, error } = await supabase
+          .from('values_vault')
+          .update(valueData)
+          .eq('id', editingValue.id)
+          .eq('user_id', user.data.user.id)
+          .select();
+        
+        if (error) throw error;
+        return data;
+      } else {
+        const { data, error } = await supabase
+          .from('values_vault')
+          .insert([{ 
+            ...valueData, 
+            user_id: user.data.user.id
+          }])
+          .select();
+        
+        if (error) throw error;
+        return data;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['values-vault'] });
-      toast({ title: "Success", description: "Value added successfully!" });
+      queryClient.invalidateQueries({ queryKey: ['pillars-hierarchy'] });
+      toast({ 
+        title: "Success", 
+        description: editingValue ? "Value updated successfully!" : "Value added successfully!" 
+      });
       resetForm();
+    },
+  });
+
+  const deleteValue = useMutation({
+    mutationFn: async (valueId: string) => {
+      const user = await supabase.auth.getUser();
+      if (!user.data.user) throw new Error('Not authenticated');
+
+      const { error } = await supabase
+        .from('values_vault')
+        .delete()
+        .eq('id', valueId)
+        .eq('user_id', user.data.user.id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['values-vault'] });
+      queryClient.invalidateQueries({ queryKey: ['pillars-hierarchy'] });
+      toast({ title: "Success", description: "Value deleted successfully!" });
     },
   });
 
@@ -66,12 +135,34 @@ export const ValuesVault = () => {
     setValue('');
     setDescription('');
     setImportanceRating(5);
+    setSelectedPillarId('');
+    setEditingValue(null);
     setIsDialogOpen(false);
+  };
+
+  const handleEdit = (valueItem: Value) => {
+    setEditingValue(valueItem);
+    setValue(valueItem.value);
+    setDescription(valueItem.description || '');
+    setImportanceRating(valueItem.importance_rating);
+    setSelectedPillarId(valueItem.pillar_id || '');
+    setIsDialogOpen(true);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createValue.mutate({ value, description, importance_rating: importanceRating });
+    createOrUpdateValue.mutate({ 
+      value, 
+      description, 
+      importance_rating: importanceRating,
+      pillar_id: selectedPillarId || null
+    });
+  };
+
+  const handleDelete = (valueId: string) => {
+    if (confirm('Are you sure you want to delete this value?')) {
+      deleteValue.mutate(valueId);
+    }
   };
 
   const getImportanceColor = (rating: number) => {
@@ -80,6 +171,11 @@ export const ValuesVault = () => {
     if (rating >= 5) return 'bg-yellow-100 text-yellow-800 border-yellow-200';
     if (rating >= 3) return 'bg-blue-100 text-blue-800 border-blue-200';
     return 'bg-gray-100 text-gray-800 border-gray-200';
+  };
+
+  const getPillarName = (pillarId: string | null) => {
+    if (!pillarId) return 'Unassigned';
+    return pillars?.find(p => p.id === pillarId)?.name || 'Unknown Pillar';
   };
 
   return (
@@ -100,7 +196,9 @@ export const ValuesVault = () => {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add New Core Value</DialogTitle>
+              <DialogTitle>
+                {editingValue ? 'Edit Core Value' : 'Add New Core Value'}
+              </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <Input
@@ -115,6 +213,22 @@ export const ValuesVault = () => {
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}
               />
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Connected Pillar</label>
+                <Select value={selectedPillarId} onValueChange={setSelectedPillarId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a pillar (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No pillar</SelectItem>
+                    {pillars?.map((pillar) => (
+                      <SelectItem key={pillar.id} value={pillar.id}>
+                        {pillar.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">
                   Importance Rating: {importanceRating}/10
@@ -132,7 +246,9 @@ export const ValuesVault = () => {
                   <span>Very Important</span>
                 </div>
               </div>
-              <Button type="submit" className="w-full">Add Value</Button>
+              <Button type="submit" className="w-full">
+                {editingValue ? 'Update Value' : 'Add Value'}
+              </Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -147,20 +263,41 @@ export const ValuesVault = () => {
                   <Heart className="h-4 w-4" />
                   {valueItem.value}
                 </div>
-                <div className="flex items-center gap-1">
-                  <Star className="h-3 w-3 fill-current" />
-                  <span className="text-sm font-normal">{valueItem.importance_rating}/10</span>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
+                    <Star className="h-3 w-3 fill-current" />
+                    <span className="text-sm font-normal">{valueItem.importance_rating}/10</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEdit(valueItem)}
+                  >
+                    <Edit className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDelete(valueItem.id)}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
                 </div>
               </CardTitle>
             </CardHeader>
             <CardContent>
               {valueItem.description && (
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <p className="text-sm text-muted-foreground leading-relaxed mb-3">
                   {valueItem.description}
                 </p>
               )}
-              <div className="text-xs text-muted-foreground mt-3">
-                Added: {new Date(valueItem.created_at).toLocaleDateString()}
+              <div className="space-y-2">
+                <Badge variant="outline" className="text-xs">
+                  {getPillarName(valueItem.pillar_id)}
+                </Badge>
+                <div className="text-xs text-muted-foreground">
+                  Added: {new Date(valueItem.created_at).toLocaleDateString()}
+                </div>
               </div>
             </CardContent>
           </Card>

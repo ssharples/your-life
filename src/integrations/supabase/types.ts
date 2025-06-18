@@ -1629,6 +1629,7 @@ export type Database = {
           description: string | null
           id: string
           importance_rating: number | null
+          pillar_id: string | null
           updated_at: string
           user_id: string
           value: string
@@ -1638,6 +1639,7 @@ export type Database = {
           description?: string | null
           id?: string
           importance_rating?: number | null
+          pillar_id?: string | null
           updated_at?: string
           user_id: string
           value: string
@@ -1647,11 +1649,20 @@ export type Database = {
           description?: string | null
           id?: string
           importance_rating?: number | null
+          pillar_id?: string | null
           updated_at?: string
           user_id?: string
           value?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "values_vault_pillar_id_fkey"
+            columns: ["pillar_id"]
+            isOneToOne: false
+            referencedRelation: "pillars"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       videos: {
         Row: {
