@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Target, Calendar, Edit, Trash2, Sparkles } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { SmartGoalDisplay } from './SmartGoalDisplay';
 
 interface Goal {
   id: string;
@@ -14,6 +15,15 @@ interface Goal {
   priority: number;
   target_date?: string;
   ai_enhanced?: boolean;
+  ai_suggestions?: {
+    smart_breakdown?: {
+      specific: string;
+      measurable: string;
+      achievable: string;
+      relevant: string;
+      timebound: string;
+    };
+  };
   pillars?: { name: string };
 }
 
@@ -35,6 +45,104 @@ export const GoalCard = ({ goal, onUpdateStatus, onEdit, onDelete }: GoalCardPro
     }
   };
 
+  // Check if this goal has SMART breakdown data
+  const smartData = goal.ai_suggestions?.smart_breakdown;
+  const isSmartGoal = smartData && Object.values(smartData).some(value => value && value.trim().length > 0);
+
+  if (isSmartGoal) {
+    return (
+      <div className="space-y-4">
+        <SmartGoalDisplay
+          smartData={smartData}
+          title={goal.title}
+          status={goal.status}
+          targetDate={goal.target_date}
+          getStatusColor={getStatusColor}
+        />
+        
+        {/* Action buttons */}
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex justify-between items-center">
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="outline">{goal.type}</Badge>
+                {goal.pillars && (
+                  <Badge variant="secondary">{goal.pillars.name}</Badge>
+                )}
+                <Badge variant="outline">Priority {goal.priority}</Badge>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                {goal.ai_enhanced && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Sparkles className="h-4 w-4 text-blue-500" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>AI Enhanced</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => onEdit(goal)}
+                >
+                  <Edit className="h-3 w-3" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => onDelete(goal.id)}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
+
+            {goal.description && (
+              <div className="text-sm text-muted-foreground mt-3 whitespace-pre-line">
+                {goal.description}
+              </div>
+            )}
+
+            <div className="flex space-x-2 mt-4">
+              {goal.status !== 'completed' && (
+                <Button
+                  size="sm"
+                  onClick={() => onUpdateStatus(goal.id, 'completed')}
+                >
+                  Complete
+                </Button>
+              )}
+              {goal.status === 'active' && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => onUpdateStatus(goal.id, 'paused')}
+                >
+                  Pause
+                </Button>
+              )}
+              {goal.status === 'paused' && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => onUpdateStatus(goal.id, 'active')}
+                >
+                  Resume
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Fallback to original card design for non-SMART goals
   return (
     <Card>
       <CardHeader>
