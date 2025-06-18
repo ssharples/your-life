@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -34,7 +33,7 @@ export const ValuesVault = () => {
   const [value, setValue] = useState('');
   const [description, setDescription] = useState('');
   const [importanceRating, setImportanceRating] = useState(5);
-  const [selectedPillarId, setSelectedPillarId] = useState<string>('');
+  const [selectedPillarId, setSelectedPillarId] = useState<string>('no-pillar');
   const queryClient = useQueryClient();
   const { showHelp } = useHelp();
 
@@ -77,10 +76,15 @@ export const ValuesVault = () => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('Not authenticated');
 
+      const dataToSave = {
+        ...valueData,
+        pillar_id: valueData.pillar_id === 'no-pillar' ? null : valueData.pillar_id
+      };
+
       if (editingValue) {
         const { data, error } = await supabase
           .from('values_vault')
-          .update(valueData)
+          .update(dataToSave)
           .eq('id', editingValue.id)
           .eq('user_id', user.data.user.id)
           .select();
@@ -91,7 +95,7 @@ export const ValuesVault = () => {
         const { data, error } = await supabase
           .from('values_vault')
           .insert([{ 
-            ...valueData, 
+            ...dataToSave, 
             user_id: user.data.user.id
           }])
           .select();
@@ -135,7 +139,7 @@ export const ValuesVault = () => {
     setValue('');
     setDescription('');
     setImportanceRating(5);
-    setSelectedPillarId('');
+    setSelectedPillarId('no-pillar');
     setEditingValue(null);
     setIsDialogOpen(false);
   };
@@ -145,7 +149,7 @@ export const ValuesVault = () => {
     setValue(valueItem.value);
     setDescription(valueItem.description || '');
     setImportanceRating(valueItem.importance_rating);
-    setSelectedPillarId(valueItem.pillar_id || '');
+    setSelectedPillarId(valueItem.pillar_id || 'no-pillar');
     setIsDialogOpen(true);
   };
 
@@ -155,7 +159,7 @@ export const ValuesVault = () => {
       value, 
       description, 
       importance_rating: importanceRating,
-      pillar_id: selectedPillarId || null
+      pillar_id: selectedPillarId
     });
   };
 
@@ -220,7 +224,7 @@ export const ValuesVault = () => {
                     <SelectValue placeholder="Select a pillar (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No pillar</SelectItem>
+                    <SelectItem value="no-pillar">No pillar</SelectItem>
                     {pillars?.map((pillar) => (
                       <SelectItem key={pillar.id} value={pillar.id}>
                         {pillar.name}
