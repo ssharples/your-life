@@ -110,7 +110,7 @@ export const ActiveProjectsWidget = () => {
                       <Clock className="h-4 w-4 text-gray-400" />
                     )}
                     <span className={task.status === 'completed' ? 'line-through text-muted-foreground' : ''}>
-                      {task.title}
+                      {task.description}
                     </span>
                   </div>
                 ))}
