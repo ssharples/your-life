@@ -39,56 +39,68 @@ const themeConfig = {
 };
 
 export const ThemeSwitcher = () => {
-  const { theme, setTheme } = useTheme();
-  const [open, setOpen] = useState(false);
+  try {
+    const { theme, setTheme } = useTheme();
+    const [open, setOpen] = useState(false);
 
-  const currentThemeConfig = themeConfig[theme];
-  const CurrentIcon = currentThemeConfig.icon;
+    const currentThemeConfig = themeConfig[theme];
+    const CurrentIcon = currentThemeConfig.icon;
 
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button variant="ghost" size="sm" className="w-full justify-start">
-          <Palette className="h-4 w-4 mr-2" />
-          <span className="flex-1 text-left">Theme</span>
-          <CurrentIcon className="h-3 w-3" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent side="right" className="w-64 p-2">
-        <div className="space-y-1">
-          <h4 className="font-medium text-sm mb-3">Choose your theme</h4>
-          {(Object.entries(themeConfig) as [Theme, typeof themeConfig[Theme]][]).map(([themeKey, config]) => {
-            const Icon = config.icon;
-            const isActive = theme === themeKey;
-            
-            return (
-              <Button
-                key={themeKey}
-                variant={isActive ? "secondary" : "ghost"}
-                size="sm"
-                className="w-full justify-start h-auto p-3"
-                onClick={() => {
-                  setTheme(themeKey);
-                  setOpen(false);
-                }}
-              >
-                <div className="flex items-center gap-3 w-full">
-                  <div className={`w-8 h-8 rounded border-2 ${config.preview} flex items-center justify-center`}>
-                    <Icon className="h-4 w-4" />
+    return (
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="ghost" size="sm" className="w-full justify-start">
+            <Palette className="h-4 w-4 mr-2" />
+            <span className="flex-1 text-left">Theme</span>
+            <CurrentIcon className="h-3 w-3" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent side="right" className="w-64 p-2">
+          <div className="space-y-1">
+            <h4 className="font-medium text-sm mb-3">Choose your theme</h4>
+            {(Object.entries(themeConfig) as [Theme, typeof themeConfig[Theme]][]).map(([themeKey, config]) => {
+              const Icon = config.icon;
+              const isActive = theme === themeKey;
+              
+              return (
+                <Button
+                  key={themeKey}
+                  variant={isActive ? "secondary" : "ghost"}
+                  size="sm"
+                  className="w-full justify-start h-auto p-3"
+                  onClick={() => {
+                    setTheme(themeKey);
+                    setOpen(false);
+                  }}
+                >
+                  <div className="flex items-center gap-3 w-full">
+                    <div className={`w-8 h-8 rounded border-2 ${config.preview} flex items-center justify-center`}>
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <div className="font-medium text-sm">{config.name}</div>
+                      <div className="text-xs text-muted-foreground">{config.description}</div>
+                    </div>
+                    {isActive && (
+                      <div className="w-2 h-2 bg-primary rounded-full" />
+                    )}
                   </div>
-                  <div className="flex-1 text-left">
-                    <div className="font-medium text-sm">{config.name}</div>
-                    <div className="text-xs text-muted-foreground">{config.description}</div>
-                  </div>
-                  {isActive && (
-                    <div className="w-2 h-2 bg-primary rounded-full" />
-                  )}
-                </div>
-              </Button>
-            );
-          })}
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
+                </Button>
+              );
+            })}
+          </div>
+        </PopoverContent>
+      </Popover>
+    );
+  } catch (error) {
+    console.error('ThemeSwitcher error:', error);
+    // Fallback UI when theme context is not available
+    return (
+      <Button variant="ghost" size="sm" className="w-full justify-start" disabled>
+        <Palette className="h-4 w-4 mr-2" />
+        <span className="flex-1 text-left">Theme</span>
+        <Sun className="h-3 w-3" />
+      </Button>
+    );
+  }
 };

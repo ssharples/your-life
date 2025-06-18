@@ -28,7 +28,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   useEffect(() => {
     // Load theme from localStorage
     const savedTheme = localStorage.getItem('lifeos-theme') as Theme;
-    if (savedTheme) {
+    if (savedTheme && ['light', 'dark', 'pastel', 'sunset', 'dusk'].includes(savedTheme)) {
       setTheme(savedTheme);
     }
   }, []);
