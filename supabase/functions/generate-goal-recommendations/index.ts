@@ -2,7 +2,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const openAIApiKey = Deno.env.get('OPEN_AI_API');
+const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,13 +15,45 @@ serve(async (req) => {
   }
 
   try {
+    if (!openAIApiKey) {
+      throw new Error('OpenAI API key not configured');
+    }
+
     const { journalEntries } = await req.json();
+
+    if (!journalEntries || journalEntries.length === 0) {
+      return new Response(JSON.stringify({ 
+        recommendations: [
+          "Set a daily affirmation practice",
+          "Create a personal growth plan",
+          "Join a supportive community",
+          "Start a new learning journey",
+          "Practice mindful self-care"
+        ]
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     // Extract content from journal entries
     const journalContent = journalEntries
       .map((entry: any) => entry.content || entry.negative_thought || entry.affirmation)
       .filter(Boolean)
       .join('\n\n');
+
+    if (!journalContent.trim()) {
+      return new Response(JSON.stringify({ 
+        recommendations: [
+          "Set a daily affirmation practice",
+          "Create a personal growth plan",
+          "Join a supportive community",
+          "Start a new learning journey",
+          "Practice mindful self-care"
+        ]
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -56,13 +88,32 @@ serve(async (req) => {
       }),
     });
 
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+    }
+
     const data = await response.json();
     let recommendations = [];
     
     try {
-      recommendations = JSON.parse(data.choices[0].message.content);
+      const content = data.choices?.[0]?.message?.content;
+      if (content) {
+        recommendations = JSON.parse(content);
+      }
     } catch (parseError) {
-      // Fallback if JSON parsing fails
+      console.error('Failed to parse OpenAI response:', parseError);
+      // Fallback recommendations
+      recommendations = [
+        "Set a daily affirmation practice",
+        "Create a personal growth plan",
+        "Join a supportive community",
+        "Start a new learning journey",
+        "Practice mindful self-care"
+      ];
+    }
+
+    // Ensure we have an array of strings
+    if (!Array.isArray(recommendations)) {
       recommendations = [
         "Set a daily affirmation practice",
         "Create a personal growth plan",
@@ -77,7 +128,16 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error('Error in generate-goal-recommendations function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ 
+      error: error.message,
+      recommendations: [
+        "Set a daily affirmation practice",
+        "Create a personal growth plan",
+        "Join a supportive community",
+        "Start a new learning journey",
+        "Practice mindful self-care"
+      ]
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

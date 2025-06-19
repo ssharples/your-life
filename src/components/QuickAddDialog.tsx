@@ -147,11 +147,16 @@ export const QuickAddDialog = ({ type, isOpen, onClose, onComplete }: QuickAddDi
       onComplete();
       onClose();
       setFormData({});
+      toast({
+        title: "Success",
+        description: "Item created successfully!",
+      });
     },
     onError: (error) => {
+      console.error('Failed to create item:', error);
       toast({
         title: "Error",
-        description: "Failed to create item. Please try again.",
+        description: `Failed to create item: ${error.message}`,
         variant: "destructive",
       });
     },
@@ -261,19 +266,46 @@ const GoalFormWithAI = ({ onSubmit, onCancel }: { onSubmit: (data: any) => void,
 
     setIsGenerating(true);
     try {
-      const response = await supabase.functions.invoke('generate-goal-recommendations', {
+      console.log('Generating AI recommendations with journal entries:', journalEntries.length);
+      
+      const { data, error } = await supabase.functions.invoke('generate-goal-recommendations', {
         body: { journalEntries }
       });
 
-      if (response.error) throw response.error;
-      setAiRecommendations(response.data.recommendations || []);
+      console.log('AI recommendations response:', { data, error });
+
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw new Error(error.message || 'Failed to generate recommendations');
+      }
+
+      if (data?.recommendations) {
+        setAiRecommendations(data.recommendations);
+      } else {
+        // Use fallback recommendations
+        setAiRecommendations([
+          "Set a daily affirmation practice",
+          "Create a personal growth plan",
+          "Join a supportive community",
+          "Start a new learning journey",
+          "Practice mindful self-care"
+        ]);
+      }
     } catch (error) {
       console.error('Failed to generate recommendations:', error);
       toast({
         title: "Error",
-        description: "Failed to generate AI recommendations. Please try again.",
+        description: "Failed to generate AI recommendations. Using default suggestions.",
         variant: "destructive",
       });
+      // Use fallback recommendations
+      setAiRecommendations([
+        "Set a daily affirmation practice",
+        "Create a personal growth plan",
+        "Join a supportive community",
+        "Start a new learning journey",
+        "Practice mindful self-care"
+      ]);
     } finally {
       setIsGenerating(false);
     }
@@ -363,7 +395,9 @@ const GoalFormWithAI = ({ onSubmit, onCancel }: { onSubmit: (data: any) => void,
       </div>
 
       <div className="flex gap-2">
-        <Button type="submit" className="flex-1">Create Goal</Button>
+        <Button type="submit" className="flex-1" disabled={createItem.isPending}>
+          {createItem.isPending ? 'Creating...' : 'Create Goal'}
+        </Button>
         <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
       </div>
     </form>
