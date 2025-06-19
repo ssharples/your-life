@@ -136,58 +136,58 @@ export const PillarHierarchy = ({ pillarsData }: PillarHierarchyProps) => {
 
   return (
     <IOSLayout>
-      <div className="space-y-4">
+      <div className="space-y-6">
         {pillarsData.map((pillar) => (
-          <IOSCard key={pillar.id} padding="none">
-            <div className="p-5">
-              <Button
-                variant="ghost"
-                onClick={() => togglePillar(pillar.id)}
-                className="w-full justify-between p-0 h-auto font-normal hover:bg-transparent"
-              >
-                <div className="flex items-start gap-3 text-left">
-                  <Building2 className="h-5 w-5 text-blue-500 mt-1 flex-shrink-0" />
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-base mb-1">{pillar.name}</h3>
-                    {pillar.description && (
-                      <p className="text-sm text-gray-600">{pillar.description}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <Badge variant="secondary" className="text-xs">
-                    {pillar.values.length} values
-                  </Badge>
-                  {expandedPillars.has(pillar.id) ? (
-                    <ChevronDown className="h-4 w-4 text-gray-500" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4 text-gray-500" />
+          <IOSCard key={pillar.id} padding="lg">
+            <Button
+              variant="ghost"
+              onClick={() => togglePillar(pillar.id)}
+              className="w-full justify-between p-0 h-auto font-normal hover:bg-transparent mb-4"
+            >
+              <div className="flex items-start gap-4 text-left">
+                <Building2 className="h-6 w-6 text-blue-500 mt-1 flex-shrink-0" />
+                <div>
+                  <h3 className="font-semibold text-gray-900 text-lg mb-2">{pillar.name}</h3>
+                  {pillar.description && (
+                    <p className="text-sm text-gray-600">{pillar.description}</p>
                   )}
                 </div>
-              </Button>
-            </div>
+              </div>
+              <div className="flex items-center gap-3 flex-shrink-0">
+                <Badge variant="secondary" className="text-xs">
+                  {pillar.values.length} values
+                </Badge>
+                {expandedPillars.has(pillar.id) ? (
+                  <ChevronDown className="h-5 w-5 text-gray-500" />
+                ) : (
+                  <ChevronRight className="h-5 w-5 text-gray-500" />
+                )}
+              </div>
+            </Button>
 
             {expandedPillars.has(pillar.id) && (
-              <div className="border-t border-gray-100 bg-gray-50 p-5 space-y-4">
+              <div className="space-y-4 pl-6">
                 {pillar.values.length === 0 ? (
-                  <div className="text-center py-6">
-                    <Heart className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                    <p className="text-gray-600">No values defined for this pillar yet.</p>
-                  </div>
+                  <IOSCard padding="lg">
+                    <div className="text-center py-8">
+                      <Heart className="h-10 w-10 mx-auto mb-3 text-gray-400" />
+                      <p className="text-gray-600">No values defined for this pillar yet.</p>
+                    </div>
+                  </IOSCard>
                 ) : (
                   pillar.values.map((value) => (
-                    <div key={value.id} className="bg-white rounded-xl p-4 shadow-sm">
+                    <IOSCard key={value.id} padding="lg">
                       <Button
                         variant="ghost"
                         onClick={() => toggleValue(value.id)}
-                        className="w-full justify-between p-0 h-auto font-normal hover:bg-transparent mb-3"
+                        className="w-full justify-between p-0 h-auto font-normal hover:bg-transparent mb-4"
                       >
                         <div className="flex items-start gap-3 text-left">
-                          <Heart className="h-4 w-4 text-pink-500 mt-1 flex-shrink-0" />
+                          <Heart className="h-5 w-5 text-pink-500 mt-1 flex-shrink-0" />
                           <div>
-                            <h4 className="font-medium text-gray-900">{value.title}</h4>
+                            <h4 className="font-medium text-gray-900 text-base mb-1">{value.title}</h4>
                             {value.description && (
-                              <p className="text-sm text-gray-600 mt-1">{value.description}</p>
+                              <p className="text-sm text-gray-600">{value.description}</p>
                             )}
                           </div>
                         </div>
@@ -196,80 +196,88 @@ export const PillarHierarchy = ({ pillarsData }: PillarHierarchyProps) => {
                             {value.goals.length} goals
                           </Badge>
                           {expandedValues.has(value.id) ? (
-                            <ChevronDown className="h-3 w-3 text-gray-500" />
+                            <ChevronDown className="h-4 w-4 text-gray-500" />
                           ) : (
-                            <ChevronRight className="h-3 w-3 text-gray-500" />
+                            <ChevronRight className="h-4 w-4 text-gray-500" />
                           )}
                         </div>
                       </Button>
 
                       {expandedValues.has(value.id) && (
-                        <div className="space-y-3 pl-7">
+                        <div className="space-y-4 pl-6">
                           {value.goals.length === 0 ? (
-                            <div className="text-center py-4">
-                              <Target className="h-6 w-6 mx-auto mb-1 text-gray-400" />
-                              <p className="text-sm text-gray-600">No goals set for this value yet.</p>
-                            </div>
+                            <IOSCard padding="md">
+                              <div className="text-center py-6">
+                                <Target className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                                <p className="text-sm text-gray-600">No goals set for this value yet.</p>
+                              </div>
+                            </IOSCard>
                           ) : (
                             value.goals.map((goal) => (
-                              <div key={goal.id} className="bg-gray-50 rounded-lg p-3">
-                                <div className="flex items-center justify-between mb-2">
-                                  <div className="flex items-center gap-2">
-                                    <Target className="h-3 w-3 text-green-500" />
+                              <IOSCard key={goal.id} padding="md">
+                                <div className="flex items-center justify-between mb-4">
+                                  <div className="flex items-center gap-3">
+                                    <Target className="h-4 w-4 text-green-500" />
                                     <span className="text-sm font-medium text-gray-900">{goal.title}</span>
                                   </div>
-                                  <Badge className={getStatusColor(goal.status)} size="sm">
+                                  <Badge className={getStatusColor(goal.status)}>
                                     {goal.status}
                                   </Badge>
                                 </div>
                                 
                                 {(goal.habits.length > 0 || goal.projects.length > 0) && (
-                                  <div className="mt-3 space-y-2">
+                                  <div className="space-y-3">
                                     {goal.habits.map((habit) => (
-                                      <div key={habit.id} className="flex items-center justify-between bg-white rounded p-2 text-xs">
-                                        <div className="flex items-center gap-2">
-                                          <Clock className="h-3 w-3 text-orange-500" />
-                                          <span className="text-gray-900">{habit.title}</span>
+                                      <IOSCard key={habit.id} padding="sm">
+                                        <div className="flex items-center justify-between">
+                                          <div className="flex items-center gap-2">
+                                            <Clock className="h-4 w-4 text-orange-500" />
+                                            <span className="text-sm text-gray-900">{habit.title}</span>
+                                          </div>
+                                          <Badge className={getStatusColor(habit.status)}>
+                                            {habit.status}
+                                          </Badge>
                                         </div>
-                                        <Badge className={getStatusColor(habit.status)} size="sm">
-                                          {habit.status}
-                                        </Badge>
-                                      </div>
+                                      </IOSCard>
                                     ))}
                                     
                                     {goal.projects.map((project) => (
-                                      <div key={project.id} className="bg-white rounded p-2">
-                                        <div className="flex items-center justify-between mb-2">
+                                      <IOSCard key={project.id} padding="sm">
+                                        <div className="flex items-center justify-between mb-3">
                                           <div className="flex items-center gap-2">
-                                            <FolderOpen className="h-3 w-3 text-purple-500" />
-                                            <span className="text-xs font-medium text-gray-900">{project.title}</span>
+                                            <FolderOpen className="h-4 w-4 text-purple-500" />
+                                            <span className="text-sm font-medium text-gray-900">{project.title}</span>
                                           </div>
-                                          <Badge className={getStatusColor(project.status)} size="sm">
+                                          <Badge className={getStatusColor(project.status)}>
                                             {project.status}
                                           </Badge>
                                         </div>
                                         
-                                        {project.tasks.map((task) => (
-                                          <div key={task.id} className="flex items-center justify-between bg-gray-50 rounded p-1 text-xs ml-5 mt-1">
-                                            <div className="flex items-center gap-1">
-                                              <CheckSquare className="h-2 w-2 text-purple-500" />
-                                              <span className="text-gray-900">{task.title}</span>
-                                            </div>
-                                            <Badge className={getStatusColor(task.status)} size="sm">
-                                              {task.status}
-                                            </Badge>
+                                        {project.tasks.length > 0 && (
+                                          <div className="space-y-2 pl-4">
+                                            {project.tasks.map((task) => (
+                                              <div key={task.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                                                <div className="flex items-center gap-2">
+                                                  <CheckSquare className="h-3 w-3 text-purple-500" />
+                                                  <span className="text-xs text-gray-900">{task.title}</span>
+                                                </div>
+                                                <Badge className={getStatusColor(task.status)}>
+                                                  {task.status}
+                                                </Badge>
+                                              </div>
+                                            ))}
                                           </div>
-                                        ))}
-                                      </div>
+                                        )}
+                                      </IOSCard>
                                     ))}
                                   </div>
                                 )}
-                              </div>
+                              </IOSCard>
                             ))
                           )}
                         </div>
                       )}
-                    </div>
+                    </IOSCard>
                   ))
                 )}
               </div>
