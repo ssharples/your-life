@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { FloatingNav } from './FloatingNav';
 import { Overview } from './modules/Overview';
@@ -10,6 +11,7 @@ import { Tasks } from './modules/Tasks';
 import { Habits } from './modules/Habits';
 import { Journals } from './modules/Journals';
 import { KnowledgeVault } from './modules/KnowledgeVault';
+import { KnowledgeGraph } from './modules/KnowledgeGraph';
 import { Reviews } from './modules/Reviews';
 import { ValuesVault } from './modules/ValuesVault';
 import { Settings } from './modules/Settings';
