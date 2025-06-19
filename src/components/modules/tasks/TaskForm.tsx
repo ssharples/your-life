@@ -59,6 +59,17 @@ export const TaskForm = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!description.trim()) return;
+    
+    console.log('TaskForm submitting data:', {
+      description,
+      priority,
+      dueDate,
+      projectId,
+      goalId,
+      tags
+    });
+    
     onSubmit({
       description,
       priority,

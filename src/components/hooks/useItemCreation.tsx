@@ -15,12 +15,29 @@ export const useItemCreation = (type: string | null, onComplete: () => void, onC
 
       switch (type) {
         case 'task': {
+          // Map frontend field names to database column names
+          const taskData = {
+            user_id: user.data.user.id,
+            description: item.description,
+            status: 'pending',
+            priority: item.priority || 3,
+            due_date: item.dueDate || null, // Map dueDate to due_date
+            project_id: item.projectId || null, // Map projectId to project_id
+            goal_id: item.goalId || null, // Map goalId to goal_id
+            tags: item.tags ? item.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean) : null
+          };
+          
+          console.log('Creating task with data:', taskData);
+          
           const { data: result, error } = await supabase
             .from('los_tasks')
-            .insert([{ ...item, status: 'pending' }])
+            .insert([taskData])
             .select()
             .single();
-          if (error) throw error;
+          if (error) {
+            console.error('Task creation error:', error);
+            throw error;
+          }
           return result;
         }
         case 'goal': {
