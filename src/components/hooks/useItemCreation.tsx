@@ -109,12 +109,17 @@ export const useItemCreation = (type: string | null, onComplete: () => void, onC
           // Map frontend field names to database column names for values
           const valueData = {
             user_id: user.data.user.id,
-            value: item.value,
+            value: item.value || item.title || item.name, // Handle multiple possible field names
             description: item.description,
-            importance_rating: item.importance || item.importance_rating || 5 // Map importance to importance_rating
+            importance_rating: item.importance || item.importance_rating || item.importanceRating || 5
           };
           
           console.log('Creating value with data:', valueData);
+          
+          // Validate that we have a value before inserting
+          if (!valueData.value || valueData.value.trim() === '') {
+            throw new Error('Value name is required');
+          }
           
           const { data: result, error } = await supabase
             .from('values_vault')
