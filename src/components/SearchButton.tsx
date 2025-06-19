@@ -28,16 +28,11 @@ export const SearchButton = ({ activeTab, setActiveTab }: SearchButtonProps) => 
   return (
     <>
       <Button
-        variant="ghost"
-        size="sm"
         onClick={() => setIsSearchOpen(true)}
-        className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+        className="h-12 w-12 rounded-full bg-blue-500 hover:bg-blue-600 shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center p-0"
+        title="Search (⌘K)"
       >
-        <Search className="h-4 w-4" />
-        <span className="hidden sm:inline">Search</span>
-        <span className="hidden sm:inline text-xs text-muted-foreground ml-auto">
-          ⌘K
-        </span>
+        <Search className="h-5 w-5 text-white" />
       </Button>
 
       <SpotlightSearch

@@ -106,7 +106,7 @@ const DashboardContent = ({ userEmail }: DashboardProps) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation Bar */}
+      {/* Simplified Navigation Bar */}
       <nav className="bg-white shadow-sm border-b sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
@@ -114,7 +114,6 @@ const DashboardContent = ({ userEmail }: DashboardProps) => {
               <h1 className="text-xl font-semibold text-gray-900">Life OS</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <SearchButton activeTab={activeTab} setActiveTab={setActiveTab} />
               <Button
                 variant="ghost"
                 size="sm"
@@ -141,39 +140,9 @@ const DashboardContent = ({ userEmail }: DashboardProps) => {
         </div>
       </nav>
 
-      {/* Tab Navigation */}
-      <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex overflow-x-auto">
-            {[
-              { id: 'overview', label: 'Overview' },
-              { id: 'pillars', label: 'Pillars' },
-              { id: 'goals', label: 'Goals' },
-              { id: 'projects', label: 'Projects' },
-              { id: 'tasks', label: 'Tasks' },
-              { id: 'habits', label: 'Habits' },
-              { id: 'journals', label: 'Journal' },
-              { id: 'knowledge', label: 'Knowledge' },
-              { id: 'knowledge-graph', label: 'Graph' },
-              { id: 'reviews', label: 'Reviews' },
-              { id: 'values', label: 'Values' },
-              { id: 'settings', label: 'Settings' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  "px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors",
-                  activeTab === tab.id
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300"
-                )}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
+      {/* Sticky Search Button - Bottom Left */}
+      <div className="fixed bottom-4 left-4 z-50 sm:bottom-6 sm:left-6">
+        <SearchButton activeTab={activeTab} setActiveTab={setActiveTab} />
       </div>
       
       <FloatingNav onQuickAdd={handleQuickAdd} />
