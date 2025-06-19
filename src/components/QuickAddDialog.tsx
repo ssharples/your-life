@@ -1,4 +1,3 @@
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { TaskForm } from './modules/tasks/TaskForm';
 import { GoalForm } from './modules/goals/GoalForm';
@@ -60,52 +59,91 @@ export const QuickAddDialog = ({ type, isOpen, onClose, onComplete }: QuickAddDi
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('Not authenticated');
 
-      let table = '';
-      let item = { ...data, user_id: user.data.user.id };
+      const item = { ...data, user_id: user.data.user.id };
 
       switch (type) {
-        case 'task':
-          table = 'los_tasks';
-          item = { ...item, status: 'pending' };
-          break;
-        case 'goal':
-          table = 'goals';
-          break;
-        case 'project':
-          table = 'los_projects';
-          item = { ...item, status: 'planning' };
-          break;
-        case 'habit':
-          table = 'habits';
-          item = { ...item, status: 'active' };
-          break;
-        case 'journal':
-          table = 'journals';
-          break;
-        case 'knowledge':
-          table = 'knowledge_entries';
-          break;
-        case 'pillar':
-          table = 'pillars';
-          break;
-        case 'value':
-          table = 'values';
-          break;
+        case 'task': {
+          const { data: result, error } = await supabase
+            .from('los_tasks')
+            .insert([{ ...item, status: 'pending' }])
+            .select()
+            .single();
+          if (error) throw error;
+          return result;
+        }
+        case 'goal': {
+          const { data: result, error } = await supabase
+            .from('goals')
+            .insert([item])
+            .select()
+            .single();
+          if (error) throw error;
+          return result;
+        }
+        case 'project': {
+          const { data: result, error } = await supabase
+            .from('los_projects')
+            .insert([{ ...item, status: 'planning' }])
+            .select()
+            .single();
+          if (error) throw error;
+          return result;
+        }
+        case 'habit': {
+          const { data: result, error } = await supabase
+            .from('habits')
+            .insert([{ ...item, status: 'active' }])
+            .select()
+            .single();
+          if (error) throw error;
+          return result;
+        }
+        case 'journal': {
+          const { data: result, error } = await supabase
+            .from('journals')
+            .insert([item])
+            .select()
+            .single();
+          if (error) throw error;
+          return result;
+        }
+        case 'knowledge': {
+          const { data: result, error } = await supabase
+            .from('knowledge_vault')
+            .insert([item])
+            .select()
+            .single();
+          if (error) throw error;
+          return result;
+        }
+        case 'pillar': {
+          const { data: result, error } = await supabase
+            .from('pillars')
+            .insert([item])
+            .select()
+            .single();
+          if (error) throw error;
+          return result;
+        }
+        case 'value': {
+          const { data: result, error } = await supabase
+            .from('values_vault')
+            .insert([item])
+            .select()
+            .single();
+          if (error) throw error;
+          return result;
+        }
         default:
           throw new Error('Invalid type');
       }
-
-      const { data: result, error } = await supabase
-        .from(table)
-        .insert([item])
-        .select()
-        .single();
-
-      if (error) throw error;
-      return result;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [type === 'task' ? 'los-tasks' : type === 'project' ? 'los-projects' : type] });
+      const queryKey = type === 'task' ? 'los-tasks' : 
+                     type === 'project' ? 'los-projects' : 
+                     type === 'knowledge' ? 'knowledge_vault' :
+                     type === 'value' ? 'values_vault' : type;
+      queryClient.invalidateQueries({ queryKey: [queryKey] });
       onComplete();
       onClose();
       setFormData({});
