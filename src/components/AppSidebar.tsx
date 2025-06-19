@@ -13,8 +13,7 @@ import {
   LogOut,
   User,
   Settings,
-  TrendingUp,
-  Brain,
+  HelpCircle,
 } from 'lucide-react';
 
 import {
@@ -103,11 +102,13 @@ interface AppSidebarProps {
 export function AppSidebar({ 
   activeTab, 
   setActiveTab, 
+  showHelp,
+  toggleHelp,
   onSignOut, 
   userEmail 
 }: AppSidebarProps) {
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <SidebarHeader>
         <div className="flex items-center gap-2 px-2 py-1">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
@@ -154,18 +155,19 @@ export function AppSidebar({
             </div>
           </SidebarMenuItem>
           <SidebarMenuItem>
+            <SidebarMenuButton onClick={toggleHelp}>
+              <HelpCircle className="h-4 w-4" />
+              <span>{showHelp ? 'Hide Help' : 'Show Help'}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
             <ThemeSwitcher />
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <Button 
-              onClick={onSignOut} 
-              variant="ghost" 
-              size="sm"
-              className="w-full justify-start"
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
-            </Button>
+            <SidebarMenuButton onClick={onSignOut}>
+              <LogOut className="h-4 w-4" />
+              <span>Sign Out</span>
+            </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

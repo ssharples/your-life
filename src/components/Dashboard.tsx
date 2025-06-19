@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
 import { Overview } from './modules/Overview';
 import { Analytics } from './modules/Analytics';
@@ -15,7 +15,7 @@ import { KnowledgeVault } from './modules/KnowledgeVault';
 import { Reviews } from './modules/Reviews';
 import { ValuesVault } from './modules/ValuesVault';
 import { Settings } from './modules/Settings';
-import { HelpProvider } from '@/contexts/HelpContext';
+import { HelpProvider, useHelp } from '@/contexts/HelpContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -23,9 +23,9 @@ interface DashboardProps {
   userEmail?: string;
 }
 
-export const Dashboard = ({ userEmail }: DashboardProps) => {
+const DashboardContent = ({ userEmail }: DashboardProps) => {
   const [activeTab, setActiveTab] = useState('overview');
-  const [showHelp, setShowHelp] = useState(false);
+  const { showHelp, toggleHelp } = useHelp();
 
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
@@ -36,10 +36,6 @@ export const Dashboard = ({ userEmail }: DashboardProps) => {
         variant: "destructive",
       });
     }
-  };
-
-  const toggleHelp = () => {
-    setShowHelp(!showHelp);
   };
 
   const renderActiveTab = () => {
@@ -76,24 +72,36 @@ export const Dashboard = ({ userEmail }: DashboardProps) => {
   };
 
   return (
-    <HelpProvider>
-      <SidebarProvider>
-        <div className="flex h-screen w-full">
-          <AppSidebar 
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            showHelp={showHelp}
-            toggleHelp={toggleHelp}
-            onSignOut={handleSignOut}
-            userEmail={userEmail}
-          />
-          <main className="flex-1 overflow-auto">
-            <div className="container mx-auto py-6 px-6">
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <AppSidebar 
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          showHelp={showHelp}
+          toggleHelp={toggleHelp}
+          onSignOut={handleSignOut}
+          userEmail={userEmail}
+        />
+        <SidebarInset>
+          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+            <SidebarTrigger className="-ml-1" />
+            <h1 className="text-lg font-semibold">Life OS</h1>
+          </header>
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+            <div className="container mx-auto py-6 px-2">
               {renderActiveTab()}
             </div>
-          </main>
-        </div>
-      </SidebarProvider>
+          </div>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
+  );
+};
+
+export const Dashboard = ({ userEmail }: DashboardProps) => {
+  return (
+    <HelpProvider>
+      <DashboardContent userEmail={userEmail} />
     </HelpProvider>
   );
 };
