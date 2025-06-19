@@ -1,3 +1,4 @@
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { TaskForm } from './modules/tasks/TaskForm';
 import { GoalForm } from './modules/goals/GoalForm';
@@ -201,6 +202,7 @@ export const QuickAddDialog = ({ type, isOpen, onClose, onComplete }: QuickAddDi
           <GoalFormWithAI
             onSubmit={handleSubmit}
             onCancel={onClose}
+            createItem={createItem}
           />
         );
       
@@ -229,7 +231,7 @@ export const QuickAddDialog = ({ type, isOpen, onClose, onComplete }: QuickAddDi
   );
 };
 
-const GoalFormWithAI = ({ onSubmit, onCancel }: { onSubmit: (data: any) => void, onCancel: () => void }) => {
+const GoalFormWithAI = ({ onSubmit, onCancel, createItem }: { onSubmit: (data: any) => void, onCancel: () => void, createItem: any }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState(3);
