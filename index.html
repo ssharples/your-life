@@ -11,7 +11,7 @@
     <!-- PWA Meta Tags -->
     <meta name="application-name" content="Your Life">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Your Life">
     <meta name="format-detection" content="telephone=no">
     <meta name="mobile-web-app-capable" content="yes">
@@ -53,6 +53,11 @@
               console.log('SW registration failed: ', registrationError);
             });
         });
+      }
+
+      // Detect standalone mode for iOS app-like behavior
+      if (window.navigator.standalone) {
+        document.body.classList.add('standalone-mode');
       }
     </script>
   </body>
