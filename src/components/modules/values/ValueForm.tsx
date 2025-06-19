@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Goal {
   id: string;
@@ -39,6 +40,8 @@ export const ValueForm = ({
   onSubmit,
   isEditing
 }: ValueFormProps) => {
+  const isMobile = useIsMobile();
+
   const handleGoalSelection = (goalId: string) => {
     if (selectedGoalIds.includes(goalId)) {
       setSelectedGoalIds(selectedGoalIds.filter(id => id !== goalId));
@@ -71,7 +74,7 @@ export const ValueForm = ({
           <SelectTrigger>
             <SelectValue placeholder="Select goals to connect" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className={isMobile ? 'max-h-[200px]' : ''}>
             {goals?.filter(goal => !selectedGoalIds.includes(goal.id)).map((goal) => (
               <SelectItem key={goal.id} value={goal.id}>
                 {goal.title}

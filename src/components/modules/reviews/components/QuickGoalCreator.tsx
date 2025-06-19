@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface QuickGoalCreatorProps {
   isOpen: boolean;
@@ -23,6 +23,7 @@ export const QuickGoalCreator = ({ isOpen, onClose, goalId }: QuickGoalCreatorPr
   const [priority, setPriority] = useState(3);
   const [targetDate, setTargetDate] = useState('');
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
 
   const createGoal = useMutation({
     mutationFn: async (newGoal: any) => {
@@ -66,7 +67,11 @@ export const QuickGoalCreator = ({ isOpen, onClose, goalId }: QuickGoalCreatorPr
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className={`sm:max-w-[425px] ${
+        isMobile 
+          ? 'fixed top-4 left-1/2 -translate-x-1/2 translate-y-0 mx-4' 
+          : ''
+      }`}>
         <DialogHeader>
           <DialogTitle>Add Goal Details</DialogTitle>
         </DialogHeader>

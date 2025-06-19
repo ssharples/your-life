@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from '@/components/ui/command';
@@ -17,6 +16,7 @@ import {
   Search,
   History
 } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const navigationItems = [
   { id: 'overview', title: 'Overview', icon: BarChart3, description: 'Dashboard and analytics' },
@@ -43,6 +43,7 @@ interface SpotlightSearchProps {
 export const SpotlightSearch = ({ isOpen, onClose, activeTab, setActiveTab }: SpotlightSearchProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [recentPages, setRecentPages] = useState<string[]>([]);
+  const isMobile = useIsMobile();
 
   // Load recent pages from localStorage
   useEffect(() => {
@@ -76,7 +77,11 @@ export const SpotlightSearch = ({ isOpen, onClose, activeTab, setActiveTab }: Sp
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="overflow-hidden p-0 shadow-2xl w-full max-w-2xl left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 mx-4 rounded-3xl">
+      <DialogContent className={`overflow-hidden p-0 shadow-2xl w-full max-w-2xl mx-4 rounded-3xl ${
+        isMobile 
+          ? 'fixed top-4 left-1/2 -translate-x-1/2 translate-y-0' 
+          : 'fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2'
+      }`}>
         <Command className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
           <CommandInput
             placeholder="Search sections..."

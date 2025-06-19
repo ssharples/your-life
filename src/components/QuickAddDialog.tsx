@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useItemCreation } from './hooks/useItemCreation';
 import { QuickAddFormRenderer } from './QuickAddFormRenderer';
 import { getDialogTitle } from './utils/dialogTitles';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface QuickAddDialogProps {
   type: string | null;
@@ -16,6 +17,7 @@ interface QuickAddDialogProps {
 
 export const QuickAddDialog = ({ type, isOpen, onClose, onComplete }: QuickAddDialogProps) => {
   const [formData, setFormData] = useState<any>({});
+  const isMobile = useIsMobile();
   
   const createItem = useItemCreation(type, onComplete, onClose);
 
@@ -58,7 +60,11 @@ export const QuickAddDialog = ({ type, isOpen, onClose, onComplete }: QuickAddDi
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className={`sm:max-w-[425px] ${
+        isMobile 
+          ? 'fixed top-4 left-1/2 -translate-x-1/2 translate-y-0 mx-4' 
+          : ''
+      }`}>
         <DialogHeader>
           <DialogTitle>{getDialogTitle(type)}</DialogTitle>
         </DialogHeader>

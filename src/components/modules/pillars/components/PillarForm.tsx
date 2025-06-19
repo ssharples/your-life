@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,12 +7,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
 import { Plus } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export const PillarForm = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
 
   const createPillar = useMutation({
     mutationFn: async (newPillar: any) => {
@@ -54,7 +55,7 @@ export const PillarForm = () => {
           Add Pillar
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className={isMobile ? 'fixed top-4 left-1/2 -translate-x-1/2 translate-y-0 mx-4' : ''}>
         <DialogHeader>
           <DialogTitle>Create New Life Pillar</DialogTitle>
         </DialogHeader>

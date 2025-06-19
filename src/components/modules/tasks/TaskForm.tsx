@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Goal {
   id: string;
@@ -46,6 +46,7 @@ export const TaskForm = ({
   const [projectId, setProjectId] = useState('');
   const [goalId, setGoalId] = useState('');
   const [tags, setTags] = useState('');
+  const isMobile = useIsMobile();
 
   const resetForm = () => {
     setDescription('');
@@ -99,7 +100,7 @@ export const TaskForm = ({
           Add Task
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className={isMobile ? 'fixed top-4 left-1/2 -translate-x-1/2 translate-y-0 mx-4' : ''}>
         <DialogHeader>
           <DialogTitle>Create New Task</DialogTitle>
         </DialogHeader>
