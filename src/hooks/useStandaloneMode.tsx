@@ -1,6 +1,13 @@
 
 import { useState, useEffect } from 'react';
 
+// Extend Navigator interface to include Safari's standalone property
+declare global {
+  interface Navigator {
+    standalone?: boolean;
+  }
+}
+
 export const useStandaloneMode = () => {
   const [isStandalone, setIsStandalone] = useState(false);
 
