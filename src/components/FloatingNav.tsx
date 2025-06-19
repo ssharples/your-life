@@ -71,7 +71,7 @@ export function FloatingNav({
       {/* Full screen backdrop on mobile */}
       {isExpanded && (
         <div 
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-opacity duration-300"
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-opacity duration-150"
           style={{
             top: 0,
             left: 0,
@@ -89,7 +89,7 @@ export function FloatingNav({
         <button
           onClick={handleToggle}
           className={cn(
-            "w-14 h-14 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center",
+            "w-14 h-14 rounded-full shadow-lg transition-all duration-200 flex items-center justify-center",
             "active:scale-95 hover:shadow-xl",
             isExpanded 
               ? "bg-red-500 rotate-45" 
@@ -121,16 +121,16 @@ export function FloatingNav({
               {navigationItems.map((item, index) => (
                 <div
                   key={item.url}
-                  className="flex items-center justify-between w-full animate-fade-in"
+                  className="flex items-center justify-between w-full animate-fade-in-fast"
                   style={{
-                    animationDelay: `${index * 50}ms`,
+                    animationDelay: `${index * 15}ms`,
                     animationFillMode: 'both'
                   }}
                 >
                   <button
                     onClick={() => handleNavClick(item.url)}
                     className={cn(
-                      "flex items-center gap-4 w-full p-4 rounded-3xl shadow-lg transition-all duration-200",
+                      "flex items-center gap-4 w-full p-4 rounded-3xl shadow-lg transition-all duration-150",
                       "active:scale-95 hover:shadow-xl bg-white/90 backdrop-blur-sm",
                       activeTab === item.url && "ring-2 ring-blue-500 ring-offset-2"
                     )}
@@ -155,16 +155,16 @@ export function FloatingNav({
               {actionItems.map((item, index) => (
                 <div
                   key={item.url}
-                  className="flex items-center justify-between w-full animate-fade-in"
+                  className="flex items-center justify-between w-full animate-fade-in-fast"
                   style={{
-                    animationDelay: `${(navigationItems.length + index) * 50}ms`,
+                    animationDelay: `${(navigationItems.length + index) * 15}ms`,
                     animationFillMode: 'both'
                   }}
                 >
                   <button
                     onClick={() => handleNavClick(item.url)}
                     className={cn(
-                      "flex items-center gap-4 w-full p-4 rounded-3xl shadow-lg transition-all duration-200",
+                      "flex items-center gap-4 w-full p-4 rounded-3xl shadow-lg transition-all duration-150",
                       "active:scale-95 hover:shadow-xl bg-white/90 backdrop-blur-sm",
                       activeTab === item.url && "ring-2 ring-blue-500 ring-offset-2"
                     )}
@@ -184,9 +184,9 @@ export function FloatingNav({
 
               {/* Help Toggle */}
               <div
-                className="flex items-center justify-between w-full animate-fade-in"
+                className="flex items-center justify-between w-full animate-fade-in-fast"
                 style={{
-                  animationDelay: `${(navigationItems.length + actionItems.length) * 50}ms`,
+                  animationDelay: `${(navigationItems.length + actionItems.length) * 15}ms`,
                   animationFillMode: 'both'
                 }}
               >
@@ -196,7 +196,7 @@ export function FloatingNav({
                     setIsExpanded(false);
                   }}
                   className={cn(
-                    "flex items-center gap-4 w-full p-4 rounded-3xl shadow-lg transition-all duration-200",
+                    "flex items-center gap-4 w-full p-4 rounded-3xl shadow-lg transition-all duration-150",
                     "active:scale-95 hover:shadow-xl bg-white/90 backdrop-blur-sm",
                     showHelp && "ring-2 ring-cyan-500 ring-offset-2"
                   )}
@@ -212,9 +212,9 @@ export function FloatingNav({
 
               {/* Theme Switcher */}
               <div
-                className="animate-fade-in"
+                className="animate-fade-in-fast"
                 style={{
-                  animationDelay: `${(navigationItems.length + actionItems.length + 1) * 50}ms`,
+                  animationDelay: `${(navigationItems.length + actionItems.length + 1) * 15}ms`,
                   animationFillMode: 'both'
                 }}
               >
@@ -225,9 +225,9 @@ export function FloatingNav({
 
               {/* Sign Out */}
               <div
-                className="flex items-center justify-between w-full animate-fade-in"
+                className="flex items-center justify-between w-full animate-fade-in-fast"
                 style={{
-                  animationDelay: `${(navigationItems.length + actionItems.length + 2) * 50}ms`,
+                  animationDelay: `${(navigationItems.length + actionItems.length + 2) * 15}ms`,
                   animationFillMode: 'both'
                 }}
               >
@@ -236,7 +236,7 @@ export function FloatingNav({
                     onSignOut();
                     setIsExpanded(false);
                   }}
-                  className="flex items-center gap-4 w-full p-4 rounded-3xl shadow-lg transition-all duration-200 active:scale-95 hover:shadow-xl bg-white/90 backdrop-blur-sm"
+                  className="flex items-center gap-4 w-full p-4 rounded-3xl shadow-lg transition-all duration-150 active:scale-95 hover:shadow-xl bg-white/90 backdrop-blur-sm"
                 >
                   <div className="w-12 h-12 rounded-full bg-red-500 flex items-center justify-center">
                     <LogOut className="h-6 w-6 text-white" />
