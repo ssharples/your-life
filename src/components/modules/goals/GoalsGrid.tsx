@@ -1,5 +1,5 @@
 
-import { GoalCard } from './GoalCard';
+import { GoalsTable } from './GoalsTable';
 
 interface Goal {
   id: string;
@@ -22,16 +22,11 @@ interface GoalsGridProps {
 
 export const GoalsGrid = ({ goals, onUpdateStatus, onEdit, onDelete }: GoalsGridProps) => {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {goals?.map((goal) => (
-        <GoalCard 
-          key={goal.id} 
-          goal={goal} 
-          onUpdateStatus={onUpdateStatus}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
-      ))}
-    </div>
+    <GoalsTable 
+      goals={goals}
+      onUpdateStatus={onUpdateStatus}
+      onEdit={onEdit}
+      onDelete={onDelete}
+    />
   );
 };
