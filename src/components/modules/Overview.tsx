@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,6 +9,7 @@ import { ActiveProjectsWidget } from './overview/ActiveProjectsWidget';
 import { ChristianQuoteWidget } from './overview/ChristianQuoteWidget';
 import { GuidedReview } from './reviews/GuidedReview';
 import { initializeEssentialHabits } from '@/utils/essentialHabits';
+import { KnowledgeGraphWidget } from './overview/KnowledgeGraphWidget';
 
 export const Overview = () => {
   const [showGuidedReview, setShowGuidedReview] = useState(false);
@@ -60,6 +60,11 @@ export const Overview = () => {
     setShowGuidedReview(true);
   };
 
+  const handleViewKnowledgeGraph = () => {
+    // Trigger navigation to knowledge graph - this will be handled by parent component
+    window.dispatchEvent(new CustomEvent('navigate-to-knowledge-graph'));
+  };
+
   if (showGuidedReview) {
     return (
       <GuidedReview 
@@ -78,9 +83,10 @@ export const Overview = () => {
       </div>
 
       {/* Quick Actions Row */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <QuickHabitsWidget onStartReview={handleStartReview} />
         <ChristianQuoteWidget />
+        <KnowledgeGraphWidget onViewFull={handleViewKnowledgeGraph} />
       </div>
 
       {/* Stats Cards */}

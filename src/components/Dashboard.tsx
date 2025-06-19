@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FloatingNav } from './FloatingNav';
 import { Overview } from './modules/Overview';
 import { Analytics } from './modules/Analytics';
@@ -54,6 +53,19 @@ const DashboardContent = ({ userEmail }: DashboardProps) => {
     });
   };
 
+  // Add event listener for knowledge graph navigation
+  useEffect(() => {
+    const handleKnowledgeGraphNavigation = () => {
+      setActiveTab('knowledge-graph');
+    };
+
+    window.addEventListener('navigate-to-knowledge-graph', handleKnowledgeGraphNavigation);
+    
+    return () => {
+      window.removeEventListener('navigate-to-knowledge-graph', handleKnowledgeGraphNavigation);
+    };
+  }, []);
+
   const renderActiveTab = () => {
     switch (activeTab) {
       case 'overview':
@@ -76,6 +88,8 @@ const DashboardContent = ({ userEmail }: DashboardProps) => {
         return <Journals />;
       case 'knowledge':
         return <KnowledgeVault />;
+      case 'knowledge-graph':
+        return <KnowledgeGraph />;
       case 'reviews':
         return <Reviews />;
       case 'values':
@@ -136,6 +150,7 @@ const DashboardContent = ({ userEmail }: DashboardProps) => {
               { id: 'habits', label: 'Habits' },
               { id: 'journals', label: 'Journal' },
               { id: 'knowledge', label: 'Knowledge' },
+              { id: 'knowledge-graph', label: 'Graph' },
               { id: 'reviews', label: 'Reviews' },
               { id: 'values', label: 'Values' },
               { id: 'settings', label: 'Settings' },
