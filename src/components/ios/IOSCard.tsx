@@ -15,16 +15,18 @@ export const IOSCard = ({
   padding = 'md',
   onClick 
 }: IOSCardProps) => {
-  const baseClasses = "bg-white rounded-2xl shadow-lg border border-gray-100 mb-4";
+  const baseClasses = "bg-white rounded-3xl shadow-sm border border-gray-100 mb-4 overflow-hidden";
   
   const paddingClasses = {
     none: "",
     sm: "p-4",
-    md: "p-5",
-    lg: "p-6"
+    md: "p-6",
+    lg: "p-8"
   };
 
-  const interactiveClasses = onClick ? "active:scale-[0.98] transition-transform duration-150 cursor-pointer hover:shadow-xl" : "hover:shadow-xl transition-shadow duration-150";
+  const interactiveClasses = onClick ? 
+    "active:scale-[0.98] transition-all duration-200 cursor-pointer hover:shadow-md active:shadow-sm" : 
+    "transition-shadow duration-200";
 
   return (
     <div

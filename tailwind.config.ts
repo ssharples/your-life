@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -12,7 +13,7 @@ export default {
 	theme: {
 		container: {
 			center: true,
-			padding: '2rem',
+			padding: '1rem',
 			screens: {
 				'2xl': '1400px'
 			}
@@ -65,8 +66,16 @@ export default {
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
-				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+				md: 'calc(var(--radius) - 8px)',
+				sm: 'calc(var(--radius) - 12px)',
+				'3xl': '24px',
+				'4xl': '32px'
+			},
+			boxShadow: {
+				'ios': 'var(--ios-shadow)',
+				'ios-sm': 'var(--ios-shadow-sm)',
+				'ios-md': 'var(--ios-shadow-md)',
+				'ios-lg': 'var(--ios-shadow-lg)',
 			},
 			keyframes: {
 				'accordion-down': {

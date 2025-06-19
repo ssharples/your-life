@@ -17,13 +17,15 @@ export const IOSLayout = ({ children, className, withSafeArea = true }: IOSLayou
         className
       )}
       style={{
-        paddingTop: withSafeArea ? 'env(safe-area-inset-top)' : undefined,
-        paddingBottom: withSafeArea ? 'env(safe-area-inset-bottom)' : undefined,
-        paddingLeft: withSafeArea ? 'env(safe-area-inset-left)' : undefined,
-        paddingRight: withSafeArea ? 'env(safe-area-inset-right)' : undefined,
+        paddingTop: withSafeArea ? 'max(env(safe-area-inset-top), 0px)' : undefined,
+        paddingBottom: withSafeArea ? 'max(env(safe-area-inset-bottom), 16px)' : undefined,
+        paddingLeft: withSafeArea ? 'max(env(safe-area-inset-left), 16px)' : undefined,
+        paddingRight: withSafeArea ? 'max(env(safe-area-inset-right), 16px)' : undefined,
       }}
     >
-      {children}
+      <div className="px-4 py-2">
+        {children}
+      </div>
     </div>
   );
 };
