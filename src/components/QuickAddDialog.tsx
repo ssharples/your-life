@@ -62,7 +62,7 @@ export const QuickAddDialog = ({ type, isOpen, onClose, onComplete }: QuickAddDi
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className={`sm:max-w-[425px] ${
         isMobile 
-          ? 'fixed top-4 left-4 right-4 mx-0 translate-x-0 translate-y-0' 
+          ? 'fixed top-4 left-0 right-0 mx-4 translate-x-0 translate-y-0' 
           : ''
       }`}>
         <DialogHeader>
