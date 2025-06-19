@@ -106,12 +106,25 @@ export const useItemCreation = (type: string | null, onComplete: () => void, onC
           return result;
         }
         case 'value': {
+          // Map frontend field names to database column names for values
+          const valueData = {
+            user_id: user.data.user.id,
+            value: item.value,
+            description: item.description,
+            importance_rating: item.importance || item.importance_rating || 5 // Map importance to importance_rating
+          };
+          
+          console.log('Creating value with data:', valueData);
+          
           const { data: result, error } = await supabase
             .from('values_vault')
-            .insert([item])
+            .insert([valueData])
             .select()
             .single();
-          if (error) throw error;
+          if (error) {
+            console.error('Value creation error:', error);
+            throw error;
+          }
           return result;
         }
         default:
@@ -124,6 +137,7 @@ export const useItemCreation = (type: string | null, onComplete: () => void, onC
                      type === 'knowledge' ? 'knowledge_vault' :
                      type === 'value' ? 'values_vault' : type;
       queryClient.invalidateQueries({ queryKey: [queryKey] });
+      queryClient.invalidateQueries({ queryKey: ['values-vault'] }); // Also invalidate values-vault for consistency
       onComplete();
       onClose();
       toast({
