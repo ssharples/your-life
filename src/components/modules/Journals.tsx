@@ -89,6 +89,14 @@ export const Journals = () => {
       toast({ title: "Success", description: "Belief entry recorded successfully!" });
       resetForm();
     },
+    onError: (error) => {
+      console.error('Error creating belief:', error);
+      toast({ 
+        title: "Error", 
+        description: "Failed to record belief entry. Please try again.",
+        variant: "destructive"
+      });
+    }
   });
 
   // Generate affirmation with AI
@@ -122,33 +130,41 @@ export const Journals = () => {
     setIsDialogOpen(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Form submitted');
+    
     const beliefContent = selectedBelief || newBelief;
     const affirmation = customAffirmation || generatedAffirmation;
     
-    if (!beliefContent) {
+    if (!beliefContent.trim()) {
       toast({ title: "Error", description: "Please enter or select a belief.", variant: "destructive" });
       return;
     }
 
-    // If it's a new belief, save it as a reusable belief
-    if (newBelief && !selectedBelief) {
-      createBelief.mutate({
-        content: newBelief,
-        entry_type: 'belief',
-        insights: beliefCategory,
-        tags: [beliefCategory]
-      });
-    }
+    console.log('Submitting belief:', { beliefContent, affirmation, beliefCategory });
 
-    // Save today's belief entry with affirmation
-    createBelief.mutate({
-      content: beliefContent,
-      entry_type: 'daily_belief',
-      insights: affirmation,
-      tags: [beliefCategory, affirmation ? 'transformed' : 'logged']
-    });
+    try {
+      // If it's a new belief, save it as a reusable belief first
+      if (newBelief && !selectedBelief) {
+        await createBelief.mutateAsync({
+          content: newBelief.trim(),
+          entry_type: 'belief',
+          insights: beliefCategory,
+          tags: [beliefCategory]
+        });
+      }
+
+      // Save today's belief entry with affirmation
+      await createBelief.mutateAsync({
+        content: beliefContent.trim(),
+        entry_type: 'daily_belief',
+        insights: affirmation?.trim() || null,
+        tags: [beliefCategory, affirmation ? 'transformed' : 'logged']
+      });
+    } catch (error) {
+      console.error('Error in handleSubmit:', error);
+    }
   };
 
   const uniqueBeliefs = beliefs?.reduce((acc, belief) => {
@@ -256,9 +272,13 @@ export const Journals = () => {
                 />
               </div>
 
-              <Button type="submit" className="w-full">
+              <Button 
+                type="submit" 
+                className="w-full"
+                disabled={createBelief.isPending}
+              >
                 <CheckCircle className="h-4 w-4 mr-2" />
-                Record Belief Check-in
+                {createBelief.isPending ? 'Recording...' : 'Record Belief Check-in'}
               </Button>
             </form>
           </DialogContent>
