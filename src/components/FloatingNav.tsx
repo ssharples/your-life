@@ -1,68 +1,44 @@
 
 import { useState } from 'react';
 import {
-  BarChart3,
-  BookOpen,
+  Plus,
+  Target,
   CheckSquare,
   Calendar,
-  Target,
-  Lightbulb,
   FolderOpen,
   Clock,
-  Heart,
+  BookOpen,
+  Lightbulb,
   Building2,
-  LogOut,
-  User,
-  Settings,
-  HelpCircle,
-  Menu,
+  Heart,
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ThemeSwitcher } from './ThemeSwitcher';
 
-const navigationItems = [
-  { title: 'Overview', url: 'overview', icon: BarChart3, color: 'bg-blue-500' },
-  { title: 'Pillars', url: 'pillars', icon: Building2, color: 'bg-purple-500' },
-  { title: 'Goals', url: 'goals', icon: Target, color: 'bg-green-500' },
-  { title: 'Projects', url: 'projects', icon: FolderOpen, color: 'bg-orange-500' },
-  { title: 'Tasks', url: 'tasks', icon: CheckSquare, color: 'bg-red-500' },
-  { title: 'Habits', url: 'habits', icon: Clock, color: 'bg-indigo-500' },
-  { title: 'Journal', url: 'journals', icon: BookOpen, color: 'bg-yellow-500' },
-  { title: 'Knowledge', url: 'knowledge', icon: Lightbulb, color: 'bg-amber-500' },
-  { title: 'Reviews', url: 'reviews', icon: Calendar, color: 'bg-teal-500' },
-  { title: 'Values', url: 'values', icon: Heart, color: 'bg-pink-500' },
-];
-
-const actionItems = [
-  { title: 'Settings', url: 'settings', icon: Settings, color: 'bg-gray-500' },
+const quickAddItems = [
+  { title: 'Goal', type: 'goal', icon: Target, color: 'bg-green-500' },
+  { title: 'Task', type: 'task', icon: CheckSquare, color: 'bg-red-500' },
+  { title: 'Project', type: 'project', icon: FolderOpen, color: 'bg-orange-500' },
+  { title: 'Habit', type: 'habit', icon: Clock, color: 'bg-indigo-500' },
+  { title: 'Journal Entry', type: 'journal', icon: BookOpen, color: 'bg-yellow-500' },
+  { title: 'Knowledge Note', type: 'knowledge', icon: Lightbulb, color: 'bg-amber-500' },
+  { title: 'Pillar', type: 'pillar', icon: Building2, color: 'bg-purple-500' },
+  { title: 'Value', type: 'value', icon: Heart, color: 'bg-pink-500' },
 ];
 
 interface FloatingNavProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-  showHelp: boolean;
-  toggleHelp: () => void;
-  onSignOut: () => void;
-  userEmail?: string;
+  onQuickAdd: (type: string) => void;
 }
 
-export function FloatingNav({ 
-  activeTab, 
-  setActiveTab, 
-  showHelp,
-  toggleHelp,
-  onSignOut, 
-  userEmail 
-}: FloatingNavProps) {
+export function FloatingNav({ onQuickAdd }: FloatingNavProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleToggle = () => {
     setIsExpanded(!isExpanded);
   };
 
-  const handleNavClick = (url: string) => {
-    setActiveTab(url);
+  const handleQuickAdd = (type: string) => {
+    onQuickAdd(type);
     setIsExpanded(false);
   };
 
@@ -85,7 +61,7 @@ export function FloatingNav({
       )}
 
       {/* Main FAB */}
-      <div className="fixed bottom-6 left-6 z-50">
+      <div className="fixed bottom-6 right-6 z-50">
         <button
           onClick={handleToggle}
           className={cn(
@@ -99,11 +75,11 @@ export function FloatingNav({
           {isExpanded ? (
             <X className="h-6 w-6 text-white" />
           ) : (
-            <Menu className="h-6 w-6 text-white" />
+            <Plus className="h-6 w-6 text-white" />
           )}
         </button>
 
-        {/* Navigation Menu - Full screen on mobile */}
+        {/* Quick Add Menu - Full screen on mobile */}
         {isExpanded && (
           <div 
             className="fixed inset-0 z-45 flex flex-col items-center justify-center p-6 overflow-y-auto"
@@ -117,10 +93,16 @@ export function FloatingNav({
             }}
           >
             <div className="w-full max-w-sm space-y-4">
-              {/* Main Navigation */}
-              {navigationItems.map((item, index) => (
+              {/* Header */}
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-white mb-2">Quick Add</h2>
+                <p className="text-white/80">What would you like to create?</p>
+              </div>
+
+              {/* Quick Add Items */}
+              {quickAddItems.map((item, index) => (
                 <div
-                  key={item.url}
+                  key={item.type}
                   className="flex items-center justify-between w-full animate-fade-in-fast"
                   style={{
                     animationDelay: `${index * 15}ms`,
@@ -128,11 +110,10 @@ export function FloatingNav({
                   }}
                 >
                   <button
-                    onClick={() => handleNavClick(item.url)}
+                    onClick={() => handleQuickAdd(item.type)}
                     className={cn(
                       "flex items-center gap-4 w-full p-4 rounded-3xl shadow-lg transition-all duration-150",
-                      "active:scale-95 hover:shadow-xl bg-white/90 backdrop-blur-sm",
-                      activeTab === item.url && "ring-2 ring-blue-500 ring-offset-2"
+                      "active:scale-95 hover:shadow-xl bg-white/90 backdrop-blur-sm hover:bg-white"
                     )}
                   >
                     <div className={cn(
@@ -147,119 +128,10 @@ export function FloatingNav({
                   </button>
                 </div>
               ))}
-
-              {/* Separator */}
-              <div className="h-px bg-gray-200 my-4" />
-
-              {/* Action Items */}
-              {actionItems.map((item, index) => (
-                <div
-                  key={item.url}
-                  className="flex items-center justify-between w-full animate-fade-in-fast"
-                  style={{
-                    animationDelay: `${(navigationItems.length + index) * 15}ms`,
-                    animationFillMode: 'both'
-                  }}
-                >
-                  <button
-                    onClick={() => handleNavClick(item.url)}
-                    className={cn(
-                      "flex items-center gap-4 w-full p-4 rounded-3xl shadow-lg transition-all duration-150",
-                      "active:scale-95 hover:shadow-xl bg-white/90 backdrop-blur-sm",
-                      activeTab === item.url && "ring-2 ring-blue-500 ring-offset-2"
-                    )}
-                  >
-                    <div className={cn(
-                      "w-12 h-12 rounded-full flex items-center justify-center",
-                      item.color
-                    )}>
-                      <item.icon className="h-6 w-6 text-white" />
-                    </div>
-                    <span className="text-lg font-medium text-gray-900 flex-1 text-left">
-                      {item.title}
-                    </span>
-                  </button>
-                </div>
-              ))}
-
-              {/* Help Toggle */}
-              <div
-                className="flex items-center justify-between w-full animate-fade-in-fast"
-                style={{
-                  animationDelay: `${(navigationItems.length + actionItems.length) * 15}ms`,
-                  animationFillMode: 'both'
-                }}
-              >
-                <button
-                  onClick={() => {
-                    toggleHelp();
-                    setIsExpanded(false);
-                  }}
-                  className={cn(
-                    "flex items-center gap-4 w-full p-4 rounded-3xl shadow-lg transition-all duration-150",
-                    "active:scale-95 hover:shadow-xl bg-white/90 backdrop-blur-sm",
-                    showHelp && "ring-2 ring-cyan-500 ring-offset-2"
-                  )}
-                >
-                  <div className="w-12 h-12 rounded-full bg-cyan-500 flex items-center justify-center">
-                    <HelpCircle className="h-6 w-6 text-white" />
-                  </div>
-                  <span className="text-lg font-medium text-gray-900 flex-1 text-left">
-                    {showHelp ? 'Hide Help' : 'Show Help'}
-                  </span>
-                </button>
-              </div>
-
-              {/* Theme Switcher */}
-              <div
-                className="animate-fade-in-fast"
-                style={{
-                  animationDelay: `${(navigationItems.length + actionItems.length + 1) * 15}ms`,
-                  animationFillMode: 'both'
-                }}
-              >
-                <div className="flex items-center justify-center w-full p-4">
-                  <ThemeSwitcher />
-                </div>
-              </div>
-
-              {/* Sign Out */}
-              <div
-                className="flex items-center justify-between w-full animate-fade-in-fast"
-                style={{
-                  animationDelay: `${(navigationItems.length + actionItems.length + 2) * 15}ms`,
-                  animationFillMode: 'both'
-                }}
-              >
-                <button
-                  onClick={() => {
-                    onSignOut();
-                    setIsExpanded(false);
-                  }}
-                  className="flex items-center gap-4 w-full p-4 rounded-3xl shadow-lg transition-all duration-150 active:scale-95 hover:shadow-xl bg-white/90 backdrop-blur-sm"
-                >
-                  <div className="w-12 h-12 rounded-full bg-red-500 flex items-center justify-center">
-                    <LogOut className="h-6 w-6 text-white" />
-                  </div>
-                  <span className="text-lg font-medium text-gray-900 flex-1 text-left">
-                    Sign Out
-                  </span>
-                </button>
-              </div>
             </div>
           </div>
         )}
       </div>
-
-      {/* User Info - Bottom Right */}
-      {userEmail && !isExpanded && (
-        <div className="fixed bottom-6 right-6 z-40">
-          <div className="bg-white/90 backdrop-blur-sm px-3 py-2 rounded-full shadow-lg text-sm font-medium text-gray-900 flex items-center gap-2">
-            <User className="h-4 w-4" />
-            <span className="hidden sm:inline truncate max-w-32">{userEmail}</span>
-          </div>
-        </div>
-      )}
     </>
   );
 }
