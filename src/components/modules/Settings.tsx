@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,7 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
-import { Bell, Clock, Settings as SettingsIcon } from 'lucide-react';
+import { Bell, Clock, Settings as SettingsIcon, HelpCircle, LogOut, User } from 'lucide-react';
+import { useHelp } from '@/contexts/HelpContext';
+import { cn } from '@/lib/utils';
 
 interface NotificationSettings {
   id?: string;
@@ -22,15 +23,31 @@ interface NotificationSettings {
   updated_at?: string;
 }
 
-export const Settings = () => {
+interface SettingsProps {
+  userEmail?: string;
+}
+
+export const Settings = ({ userEmail }: SettingsProps) => {
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
   const queryClient = useQueryClient();
+  const { showHelp, toggleHelp } = useHelp();
 
   useEffect(() => {
     if ('Notification' in window) {
       setNotificationPermission(Notification.permission);
     }
   }, []);
+
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const { data: settings } = useQuery({
     queryKey: ['notification-settings'],
@@ -122,9 +139,61 @@ export const Settings = () => {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
-          <p className="text-muted-foreground">Manage your notification preferences</p>
+          <p className="text-muted-foreground">Manage your preferences and account</p>
         </div>
       </div>
+
+      {/* Account Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <User className="h-5 w-5" />
+            Account
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium">Email</p>
+              <p className="text-sm text-muted-foreground">
+                {userEmail || 'Not available'}
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium">Help Mode</p>
+              <p className="text-sm text-muted-foreground">
+                Show helpful tooltips and guidance
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleHelp}
+              className={cn(
+                "text-sm",
+                showHelp ? "text-blue-600 bg-blue-50" : "text-gray-600"
+              )}
+            >
+              <HelpCircle className="h-4 w-4 mr-2" />
+              {showHelp ? 'On' : 'Off'}
+            </Button>
+          </div>
+
+          <div className="pt-4 border-t">
+            <Button
+              variant="outline"
+              onClick={handleSignOut}
+              className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Notification Permission */}
       <Card>
