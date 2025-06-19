@@ -5,6 +5,7 @@ import { CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DailyTaskReview } from '../DailyTaskReview';
 import { DailyHabitReview } from '../DailyHabitReview';
+import { DailyValuesReview } from '../DailyValuesReview';
 import { NewTaskCreator } from './NewTaskCreator';
 import { useState } from 'react';
 
@@ -121,6 +122,20 @@ export const ReviewStepContent = ({
               </motion.div>
             )}
 
+            {/* Values review for step 3 of daily review */}
+            {reviewType === 'daily' && currentStep === 3 && (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <DailyValuesReview 
+                  responses={responses.values || []}
+                  onUpdate={(values) => onUpdateResponse('values', values)}
+                />
+              </motion.div>
+            )}
+
             {/* Task creation for step 4 of daily review */}
             {reviewType === 'daily' && currentStep === 4 && (
               <motion.div
@@ -137,7 +152,7 @@ export const ReviewStepContent = ({
             )}
 
             {/* Standard prompts for all other steps */}
-            {(reviewType !== 'daily' || (currentStep !== 1 && currentStep !== 2)) && (
+            {(reviewType !== 'daily' || (currentStep !== 1 && currentStep !== 2 && currentStep !== 3)) && (
               <div className="space-y-6">
                 {prompts.map((prompt: string, index: number) => (
                   <motion.div

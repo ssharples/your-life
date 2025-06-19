@@ -1695,6 +1695,44 @@ export type Database = {
           },
         ]
       }
+      value_logs: {
+        Row: {
+          created_at: string | null
+          date: string
+          description: string | null
+          id: string
+          updated_at: string | null
+          user_id: string
+          value_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          date?: string
+          description?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id: string
+          value_id: string
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          description?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+          value_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "value_logs_value_id_fkey"
+            columns: ["value_id"]
+            isOneToOne: false
+            referencedRelation: "values_vault"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       values_vault: {
         Row: {
           created_at: string
