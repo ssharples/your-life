@@ -9,7 +9,7 @@ interface HelpContextType {
 const HelpContext = createContext<HelpContextType | undefined>(undefined);
 
 export const HelpProvider = ({ children }: { children: React.ReactNode }) => {
-  const [showHelp, setShowHelp] = useState(true);
+  const [showHelp, setShowHelp] = useState(false);
 
   const toggleHelp = () => {
     setShowHelp(!showHelp);

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { FloatingNav } from './FloatingNav';
 import { Overview } from './modules/Overview';
@@ -18,6 +19,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { QuickAddDialog } from './QuickAddDialog';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { HelpCircle } from 'lucide-react';
 
 interface DashboardProps {
   userEmail?: string;
@@ -94,6 +97,18 @@ const DashboardContent = ({ userEmail }: DashboardProps) => {
               <h1 className="text-xl font-semibold text-gray-900">Life OS</h1>
             </div>
             <div className="flex items-center space-x-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleHelp}
+                className={cn(
+                  "text-sm",
+                  showHelp ? "text-blue-600 bg-blue-50" : "text-gray-600"
+                )}
+              >
+                <HelpCircle className="h-4 w-4 mr-2" />
+                Help
+              </Button>
               {userEmail && (
                 <span className="text-sm text-gray-600 hidden sm:inline">{userEmail}</span>
               )}
