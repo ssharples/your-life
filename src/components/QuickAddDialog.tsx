@@ -70,12 +70,23 @@ export const QuickAddDialog = ({ type, isOpen, onClose, onComplete }: QuickAddDi
           return result;
         }
         case 'goal': {
+          // Ensure type is set to 'outcome' for goals
+          const goalData = { 
+            ...item, 
+            type: 'outcome',
+            status: 'active' 
+          };
+          console.log('Creating goal with data:', goalData);
+          
           const { data: result, error } = await supabase
             .from('goals')
-            .insert([item])
+            .insert([goalData])
             .select()
             .single();
-          if (error) throw error;
+          if (error) {
+            console.error('Goal creation error:', error);
+            throw error;
+          }
           return result;
         }
         case 'project': {
