@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -100,7 +101,7 @@ export const TaskForm = ({
           Add Task
         </Button>
       </DialogTrigger>
-      <DialogContent className={isMobile ? 'fixed top-4 left-1/2 -translate-x-1/2 translate-y-0 mx-4' : ''}>
+      <DialogContent className={isMobile ? 'fixed top-4 left-4 right-4 mx-0 translate-x-0 translate-y-0' : ''}>
         <DialogHeader>
           <DialogTitle>Create New Task</DialogTitle>
         </DialogHeader>

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -70,7 +71,7 @@ export const QuickProjectCreator = ({ isOpen, onClose, projectId }: QuickProject
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className={`sm:max-w-[425px] ${
         isMobile 
-          ? 'fixed top-4 left-1/2 -translate-x-1/2 translate-y-0 mx-4' 
+          ? 'fixed top-4 left-4 right-4 mx-0 translate-x-0 translate-y-0' 
           : ''
       }`}>
         <DialogHeader>
