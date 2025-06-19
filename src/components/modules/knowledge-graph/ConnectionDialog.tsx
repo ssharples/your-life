@@ -32,8 +32,6 @@ export const ConnectionDialog = ({
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('Not authenticated');
 
-      // For now, we'll just create a simple connection record
-      // In a real implementation, this would depend on the specific relationship type
       const { data, error } = await supabase
         .from('knowledge_connections')
         .insert({
@@ -41,7 +39,9 @@ export const ConnectionDialog = ({
           source_id: sourceId,
           target_id: targetId,
           connection_type: type
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
       return data;
@@ -54,12 +54,13 @@ export const ConnectionDialog = ({
       onComplete();
       onClose();
       setTargetNodeId('');
+      queryClient.invalidateQueries({ queryKey: ['knowledge-graph-connections'] });
     },
     onError: (error) => {
       console.error('Error creating connection:', error);
       toast({
         title: "Error",
-        description: "Failed to create connection. This feature requires database setup.",
+        description: "Failed to create connection.",
         variant: "destructive"
       });
     }

@@ -4,10 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
-import { Network, Link2, Plus, X } from 'lucide-react';
+import { Network, Link2 } from 'lucide-react';
 import { KnowledgeGraphCanvas } from './knowledge-graph/KnowledgeGraphCanvas';
 import { ConnectionDialog } from './knowledge-graph/ConnectionDialog';
 
@@ -70,6 +68,23 @@ export const KnowledgeGraph = () => {
         knowledge: knowledgeData.data || [],
         values: valuesData.data || []
       };
+    }
+  });
+
+  // Fetch custom connections
+  const { data: customConnections } = useQuery({
+    queryKey: ['knowledge-graph-connections'],
+    queryFn: async () => {
+      const user = await supabase.auth.getUser();
+      if (!user.data.user) throw new Error('Not authenticated');
+
+      const { data, error } = await supabase
+        .from('knowledge_connections')
+        .select('*')
+        .eq('user_id', user.data.user.id);
+
+      if (error) throw error;
+      return data || [];
     }
   });
 
@@ -233,8 +248,20 @@ export const KnowledgeGraph = () => {
       });
     });
 
+    // Add custom connections from database
+    if (customConnections) {
+      customConnections.forEach(conn => {
+        connections.push({
+          id: conn.id,
+          source: conn.source_id,
+          target: conn.target_id,
+          type: conn.connection_type as 'direct' | 'related'
+        });
+      });
+    }
+
     return { nodes, connections };
-  }, [allData])();
+  }, [allData, customConnections])();
 
   const handleNodeClick = (node: GraphNode) => {
     setSelectedNode(node);
@@ -248,11 +275,7 @@ export const KnowledgeGraph = () => {
   const handleConnectionComplete = () => {
     setIsConnectionDialogOpen(false);
     setConnectionSource(null);
-    queryClient.invalidateQueries({ queryKey: ['knowledge-graph-data'] });
-    toast({
-      title: "Success",
-      description: "Connection created successfully!"
-    });
+    queryClient.invalidateQueries({ queryKey: ['knowledge-graph-connections'] });
   };
 
   if (isLoading) {

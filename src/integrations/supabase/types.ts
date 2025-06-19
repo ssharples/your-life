@@ -906,6 +906,36 @@ export type Database = {
         }
         Relationships: []
       }
+      knowledge_connections: {
+        Row: {
+          connection_type: string
+          created_at: string
+          id: string
+          source_id: string
+          target_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          connection_type?: string
+          created_at?: string
+          id?: string
+          source_id: string
+          target_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          connection_type?: string
+          created_at?: string
+          id?: string
+          source_id?: string
+          target_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       knowledge_vault: {
         Row: {
           content: string
