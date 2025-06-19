@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from '@/components/ui/command';
@@ -78,11 +77,7 @@ export const SpotlightSearch = ({ isOpen, onClose, activeTab, setActiveTab }: Sp
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className={`overflow-hidden p-0 shadow-2xl w-full max-w-2xl rounded-3xl ${
-        isMobile 
-          ? 'fixed top-4 left-0 right-0 mx-4 translate-x-0 translate-y-0' 
-          : 'fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2'
-      }`}>
+      <DialogContent className="overflow-hidden p-0 shadow-2xl w-full max-w-2xl rounded-3xl">
         <Command className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
           <CommandInput
             placeholder="Search sections..."

@@ -1,4 +1,3 @@
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -60,11 +59,7 @@ export const QuickAddDialog = ({ type, isOpen, onClose, onComplete }: QuickAddDi
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className={`sm:max-w-[425px] ${
-        isMobile 
-          ? 'fixed top-4 left-0 right-0 mx-4 translate-x-0 translate-y-0' 
-          : ''
-      }`}>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{getDialogTitle(type)}</DialogTitle>
         </DialogHeader>
