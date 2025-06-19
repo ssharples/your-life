@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { FloatingNav } from './FloatingNav';
+import { SearchButton } from './SearchButton';
 import { Overview } from './modules/Overview';
 import { Analytics } from './modules/Analytics';
 import { SmartReviews } from './modules/SmartReviews';
@@ -113,6 +114,7 @@ const DashboardContent = ({ userEmail }: DashboardProps) => {
               <h1 className="text-xl font-semibold text-gray-900">Life OS</h1>
             </div>
             <div className="flex items-center space-x-4">
+              <SearchButton activeTab={activeTab} setActiveTab={setActiveTab} />
               <Button
                 variant="ghost"
                 size="sm"
