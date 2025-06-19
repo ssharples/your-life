@@ -185,7 +185,7 @@ export const Habits = () => {
           {/* Do's Section */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <h3 className="text-xl font-semibold">Do's</h3>
+              <h3 className="text-xl font-semibold">Build Habits</h3>
               <span className="bg-secondary text-secondary-foreground px-2 py-1 rounded text-sm">{doHabits.length} habits</span>
             </div>
             {doHabits.length === 0 ? <Card>
