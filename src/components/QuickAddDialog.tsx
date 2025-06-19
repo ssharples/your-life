@@ -191,6 +191,14 @@ export const QuickAddDialog = ({ type, isOpen, onClose, onComplete }: QuickAddDi
           />
         );
       
+      case 'goal':
+        return (
+          <GoalFormWithAI
+            onSubmit={handleSubmit}
+            onCancel={onClose}
+          />
+        );
+      
       case 'habit':
         return (
           <HabitForm
@@ -213,6 +221,152 @@ export const QuickAddDialog = ({ type, isOpen, onClose, onComplete }: QuickAddDi
         {renderForm()}
       </DialogContent>
     </Dialog>
+  );
+};
+
+const GoalFormWithAI = ({ onSubmit, onCancel }: { onSubmit: (data: any) => void, onCancel: () => void }) => {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [priority, setPriority] = useState(3);
+  const [aiRecommendations, setAiRecommendations] = useState<string[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const { data: journalEntries } = useQuery({
+    queryKey: ['journal-entries'],
+    queryFn: async () => {
+      const user = await supabase.auth.getUser();
+      if (!user.data.user) return [];
+      
+      const { data, error } = await supabase
+        .from('journals')
+        .select('*')
+        .eq('user_id', user.data.user.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const generateAIRecommendations = async () => {
+    if (!journalEntries || journalEntries.length === 0) {
+      toast({
+        title: "No Journal Entries",
+        description: "Add some mindset journal entries first to get AI-powered goal recommendations.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const response = await supabase.functions.invoke('generate-goal-recommendations', {
+        body: { journalEntries }
+      });
+
+      if (response.error) throw response.error;
+      setAiRecommendations(response.data.recommendations || []);
+    } catch (error) {
+      console.error('Failed to generate recommendations:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate AI recommendations. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim()) return;
+
+    const data = { 
+      title, 
+      description, 
+      type: 'outcome',
+      priority 
+    };
+
+    onSubmit(data);
+  };
+
+  const useRecommendation = (recommendation: string) => {
+    setTitle(recommendation);
+    setDescription(`This goal is inspired by your positive mindset journal entries to help you take action on your affirmations.`);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <Input
+        placeholder="What do you want to achieve?"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        required
+      />
+      
+      <Textarea
+        placeholder="Describe your goal..."
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        rows={3}
+      />
+
+      <Select value={priority.toString()} onValueChange={(value) => setPriority(parseInt(value))}>
+        <SelectTrigger>
+          <SelectValue placeholder="Priority" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="1">1 - Highest</SelectItem>
+          <SelectItem value="2">2 - High</SelectItem>
+          <SelectItem value="3">3 - Medium</SelectItem>
+          <SelectItem value="4">4 - Low</SelectItem>
+          <SelectItem value="5">5 - Lowest</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <div className="border-t pt-4">
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="font-medium text-sm text-gray-700">AI Goal Recommendations</h4>
+          <Button 
+            type="button" 
+            variant="outline" 
+            size="sm"
+            onClick={generateAIRecommendations}
+            disabled={isGenerating}
+          >
+            {isGenerating ? 'Generating...' : 'Get AI Ideas'}
+          </Button>
+        </div>
+        
+        {aiRecommendations.length > 0 && (
+          <div className="space-y-2 max-h-32 overflow-y-auto">
+            {aiRecommendations.map((recommendation, index) => (
+              <div 
+                key={index}
+                className="p-2 bg-blue-50 rounded text-sm cursor-pointer hover:bg-blue-100 transition-colors"
+                onClick={() => useRecommendation(recommendation)}
+              >
+                <span className="text-blue-700">💡 {recommendation}</span>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        {aiRecommendations.length === 0 && journalEntries && journalEntries.length > 0 && (
+          <p className="text-xs text-gray-500">
+            Click "Get AI Ideas" to generate goal recommendations based on your mindset journal entries
+          </p>
+        )}
+      </div>
+
+      <div className="flex gap-2">
+        <Button type="submit" className="flex-1">Create Goal</Button>
+        <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
+      </div>
+    </form>
   );
 };
 
