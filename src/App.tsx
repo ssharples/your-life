@@ -12,7 +12,7 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => {
+function App() {
   useEffect(() => {
     // Initialize notifications when app loads
     initializeNotifications();
@@ -34,6 +34,6 @@ const App = () => {
       </ThemeProvider>
     </QueryClientProvider>
   );
-};
+}
 
 export default App;
