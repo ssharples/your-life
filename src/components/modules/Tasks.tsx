@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,11 +10,19 @@ import { TaskActions } from './tasks/TaskActions';
 import { TaskForm } from './tasks/TaskForm';
 import { TasksGuide } from '@/components/guides/TasksGuide';
 import { useHelp } from '@/contexts/HelpContext';
+import { useItemCreation } from '@/components/hooks/useItemCreation';
 
 export const Tasks = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const queryClient = useQueryClient();
   const { showHelp } = useHelp();
+
+  // Use the same creation logic as quick add
+  const createTask = useItemCreation('task', () => {
+    console.log('Task created successfully');
+  }, () => {
+    console.log('Task creation completed');
+  });
 
   const { data: tasks } = useQuery({
     queryKey: ['los-tasks'],
@@ -70,25 +77,6 @@ export const Tasks = () => {
     },
   });
 
-  const createTask = useMutation({
-    mutationFn: async (newTask: any) => {
-      const user = await supabase.auth.getUser();
-      if (!user.data.user) throw new Error('Not authenticated');
-
-      const { data, error } = await supabase
-        .from('los_tasks')
-        .insert([{ ...newTask, user_id: user.data.user.id }])
-        .select();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['los-tasks'] });
-      toast({ title: "Success", description: "Task created successfully!" });
-    },
-  });
-
   const updateTaskStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       const { data, error } = await supabase
@@ -111,20 +99,19 @@ export const Tasks = () => {
   };
 
   const handleTaskSubmit = (taskData: any) => {
+    console.log('Tasks section submitting:', taskData);
     createTask.mutate(taskData);
     setIsDialogOpen(false);
   };
 
   const handleGoalChange = (value: string) => {
     if (value === 'new-goal') {
-      // Handle new goal creation
       console.log('Create new goal');
     }
   };
 
   const handleProjectChange = (value: string) => {
     if (value === 'new-project') {
-      // Handle new project creation
       console.log('Create new project');
     }
   };
