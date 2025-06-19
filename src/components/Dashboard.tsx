@@ -1,7 +1,6 @@
 
 import { useState } from 'react';
-import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
-import { AppSidebar } from './AppSidebar';
+import { FloatingNav } from './FloatingNav';
 import { Overview } from './modules/Overview';
 import { Analytics } from './modules/Analytics';
 import { SmartReviews } from './modules/SmartReviews';
@@ -72,29 +71,22 @@ const DashboardContent = ({ userEmail }: DashboardProps) => {
   };
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <AppSidebar 
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          showHelp={showHelp}
-          toggleHelp={toggleHelp}
-          onSignOut={handleSignOut}
-          userEmail={userEmail}
-        />
-        <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-            <SidebarTrigger className="-ml-1" />
-            <h1 className="text-lg font-semibold">Life OS</h1>
-          </header>
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-            <div className="container mx-auto py-6 px-2">
-              {renderActiveTab()}
-            </div>
-          </div>
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
+    <div className="min-h-screen bg-gray-50">
+      <FloatingNav 
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        showHelp={showHelp}
+        toggleHelp={toggleHelp}
+        onSignOut={handleSignOut}
+        userEmail={userEmail}
+      />
+      
+      <main className="pb-24 px-4 pt-6">
+        <div className="container mx-auto max-w-6xl">
+          {renderActiveTab()}
+        </div>
+      </main>
+    </div>
   );
 };
 
