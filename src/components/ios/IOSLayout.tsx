@@ -13,19 +13,16 @@ export const IOSLayout = ({ children, className, withSafeArea = true }: IOSLayou
     <div 
       className={cn(
         "min-h-screen bg-gray-50",
-        withSafeArea && "safe-area-insets",
         className
       )}
       style={{
-        paddingTop: withSafeArea ? 'max(env(safe-area-inset-top), 0px)' : undefined,
-        paddingBottom: withSafeArea ? 'max(env(safe-area-inset-bottom), 16px)' : undefined,
-        paddingLeft: withSafeArea ? 'max(env(safe-area-inset-left), 16px)' : undefined,
-        paddingRight: withSafeArea ? 'max(env(safe-area-inset-right), 16px)' : undefined,
+        paddingTop: withSafeArea ? 'max(env(safe-area-inset-top), 24px)' : '24px',
+        paddingBottom: withSafeArea ? 'max(env(safe-area-inset-bottom), 24px)' : '24px',
+        paddingLeft: withSafeArea ? 'max(env(safe-area-inset-left), 20px)' : '20px',
+        paddingRight: withSafeArea ? 'max(env(safe-area-inset-right), 20px)' : '20px',
       }}
     >
-      <div className="px-4 py-2">
-        {children}
-      </div>
+      {children}
     </div>
   );
 };

@@ -81,10 +81,8 @@ const DashboardContent = ({ userEmail }: DashboardProps) => {
         userEmail={userEmail}
       />
       
-      <main className="pb-24 px-4 pt-6">
-        <div className="container mx-auto max-w-6xl">
-          {renderActiveTab()}
-        </div>
+      <main className="px-4 py-6 pb-32">
+        {renderActiveTab()}
       </main>
     </div>
   );
