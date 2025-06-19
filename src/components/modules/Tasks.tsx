@@ -1,19 +1,17 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
-import { Plus, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
-import { TaskCard } from './tasks/TaskCard';
-import { TaskActions } from './tasks/TaskActions';
-import { TaskForm } from './tasks/TaskForm';
+import { CheckCircle2, Clock, Plus } from 'lucide-react';
 import { TasksGuide } from '@/components/guides/TasksGuide';
 import { useHelp } from '@/contexts/HelpContext';
 import { useItemCreation } from '@/components/hooks/useItemCreation';
+import { TaskInput } from './tasks/TaskInput';
+import { AppleTasksList } from './tasks/AppleTasksList';
 
 export const Tasks = () => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const queryClient = useQueryClient();
   const { showHelp } = useHelp();
 
@@ -94,108 +92,91 @@ export const Tasks = () => {
     },
   });
 
-  const resetForm = () => {
-    setIsDialogOpen(false);
-  };
+  const deleteTask = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('los_tasks')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['los-tasks'] });
+      toast({ title: "Success", description: "Task deleted successfully!" });
+    },
+  });
 
   const handleTaskSubmit = (taskData: any) => {
     console.log('Tasks section submitting:', taskData);
     createTask.mutate(taskData);
-    setIsDialogOpen(false);
-  };
-
-  const handleGoalChange = (value: string) => {
-    if (value === 'new-goal') {
-      console.log('Create new goal');
-    }
-  };
-
-  const handleProjectChange = (value: string) => {
-    if (value === 'new-project') {
-      console.log('Create new project');
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed': return <CheckCircle2 className="h-4 w-4 text-green-600" />;
-      case 'in-progress': return <Clock className="h-4 w-4 text-blue-600" />;
-      case 'pending': return <AlertCircle className="h-4 w-4 text-yellow-600" />;
-      default: return <AlertCircle className="h-4 w-4 text-gray-600" />;
-    }
   };
 
   const completedTasks = tasks?.filter(task => task.status === 'completed') || [];
   const activeTasks = tasks?.filter(task => task.status !== 'completed') || [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-4xl mx-auto">
       {showHelp && <TasksGuide />}
       
-      <div className="flex justify-between items-center">
+      <div className="space-y-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Tasks</h2>
-          <p className="text-muted-foreground">Organize and track your daily tasks</p>
+          <h1 className="text-2xl font-bold text-blue-600 mb-2">Today</h1>
+          <p className="text-sm text-gray-500">Organize and track your tasks</p>
         </div>
-        <TaskForm 
+
+        {/* Task Input */}
+        <TaskInput 
+          onSubmit={handleTaskSubmit}
           goals={goals}
           projects={projects}
-          onSubmit={handleTaskSubmit}
-          onGoalChange={handleGoalChange}
-          onProjectChange={handleProjectChange}
         />
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
-              Active Tasks ({activeTasks.length})
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Active Tasks */}
+        <Card className="border-gray-200">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Clock className="h-5 w-5 text-blue-500" />
+              Active Tasks
+              <span className="text-sm font-normal text-gray-500">({activeTasks.length})</span>
             </CardTitle>
-            <CardDescription>
-              Tasks that are pending or in progress
+            <CardDescription className="text-sm">
+              Tasks that need your attention
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {activeTasks.map((task) => (
-              <TaskCard 
-                key={task.id} 
-                task={task}
-                onStatusUpdate={(id, status) => updateTaskStatus.mutate({ id, status })}
-              />
-            ))}
-            {activeTasks.length === 0 && (
-              <p className="text-muted-foreground text-center py-4">
-                No active tasks. Create one to get started!
-              </p>
-            )}
+          <CardContent className="pt-0">
+            <AppleTasksList
+              tasks={activeTasks}
+              title="Active Tasks"
+              onStatusUpdate={(id, status) => updateTaskStatus.mutate({ id, status })}
+              onDelete={(id) => deleteTask.mutate(id)}
+              emptyMessage="No active tasks. Create one to get started!"
+            />
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
-              Completed Tasks ({completedTasks.length})
+        {/* Completed Tasks */}
+        <Card className="border-gray-200">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <CheckCircle2 className="h-5 w-5 text-green-500" />
+              Completed Tasks
+              <span className="text-sm font-normal text-gray-500">({completedTasks.length})</span>
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-sm">
               Tasks you've finished
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4 max-h-96 overflow-y-auto">
-            {completedTasks.map((task) => (
-              <TaskCard 
-                key={task.id} 
-                task={task}
-                onStatusUpdate={(id, status) => updateTaskStatus.mutate({ id, status })}
-              />
-            ))}
-            {completedTasks.length === 0 && (
-              <p className="text-muted-foreground text-center py-4">
-                No completed tasks yet.
-              </p>
-            )}
+          <CardContent className="pt-0 max-h-96 overflow-y-auto">
+            <AppleTasksList
+              tasks={completedTasks}
+              title="Completed Tasks"
+              onStatusUpdate={(id, status) => updateTaskStatus.mutate({ id, status })}
+              onDelete={(id) => deleteTask.mutate(id)}
+              emptyMessage="No completed tasks yet."
+            />
           </CardContent>
         </Card>
       </div>
