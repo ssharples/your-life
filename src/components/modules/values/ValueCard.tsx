@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Heart, Star, Edit, Trash2, Timeline } from 'lucide-react';
+import { Heart, Star, Edit, Trash2, History } from 'lucide-react';
 import { getImportanceColor } from './utils';
 import { ValueTimeline } from './ValueTimeline';
 
@@ -51,7 +51,7 @@ export const ValueCard = ({ value, onEdit, onDelete }: ValueCardProps) => {
                 onClick={() => setShowTimeline(true)}
                 title="View timeline"
               >
-                <Timeline className="h-3 w-3" />
+                <History className="h-3 w-3" />
               </Button>
               <Button
                 variant="ghost"
