@@ -76,12 +76,13 @@ export const SpotlightSearch = ({ isOpen, onClose, activeTab, setActiveTab }: Sp
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="overflow-hidden p-0 shadow-2xl max-w-2xl mx-4 sm:mx-auto">
+      <DialogContent className="overflow-hidden p-0 shadow-2xl max-w-2xl mx-4 sm:mx-auto rounded-3xl">
         <Command className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
           <CommandInput
             placeholder="Search sections..."
             value={searchQuery}
             onValueChange={setSearchQuery}
+            className="rounded-t-3xl"
           />
           <CommandList className="max-h-[400px]">
             <CommandEmpty>No results found.</CommandEmpty>
@@ -93,7 +94,7 @@ export const SpotlightSearch = ({ isOpen, onClose, activeTab, setActiveTab }: Sp
                     key={`recent-${item.id}`}
                     value={item.id}
                     onSelect={handleSelect}
-                    className="flex items-center gap-2 cursor-pointer"
+                    className="flex items-center gap-2 cursor-pointer rounded-2xl"
                   >
                     <History className="h-4 w-4 text-muted-foreground" />
                     <item.icon className="h-4 w-4" />
@@ -114,7 +115,7 @@ export const SpotlightSearch = ({ isOpen, onClose, activeTab, setActiveTab }: Sp
                     key={item.id}
                     value={item.id}
                     onSelect={handleSelect}
-                    className="flex items-center gap-2 cursor-pointer"
+                    className="flex items-center gap-2 cursor-pointer rounded-2xl"
                   >
                     <item.icon className="h-4 w-4" />
                     <div className="flex flex-col">
