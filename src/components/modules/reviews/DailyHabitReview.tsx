@@ -103,18 +103,18 @@ export const DailyHabitReview = ({ responses, onUpdate }: DailyHabitReviewProps)
   if (!habits || habits.length === 0) {
     return (
       <Card>
-        <CardContent className="p-6 text-center">
-          <Target className="h-12 w-12 mx-auto text-blue-500 mb-4" />
-          <p className="text-lg font-medium">No active habits</p>
-          <p className="text-muted-foreground">Create some habits to track your daily progress.</p>
+        <CardContent className="p-4 text-center">
+          <Target className="h-8 w-8 mx-auto text-blue-500 mb-3" />
+          <p className="text-base font-medium">No active habits</p>
+          <p className="text-sm text-muted-foreground">Create some habits to track your daily progress.</p>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
+    <div className="space-y-3">
+      <p className="text-sm text-muted-foreground px-1">
         Mark each habit as successful or failed for today:
       </p>
       
@@ -123,32 +123,33 @@ export const DailyHabitReview = ({ responses, onUpdate }: DailyHabitReviewProps)
         const isLogged = !!log;
         
         return (
-          <Card key={habit.id} className={isLogged ? 'border-green-200' : ''}>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <h4 className="font-medium">{habit.title}</h4>
+          <Card key={habit.id} className={`${isLogged ? 'border-green-200' : ''} mx-1`}>
+            <CardContent className="p-3">
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <h4 className="font-medium text-sm leading-tight">{habit.title}</h4>
                   {habit.description && (
-                    <p className="text-sm text-muted-foreground mt-1">{habit.description}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{habit.description}</p>
                   )}
-                  <div className="flex items-center gap-2 mt-2">
-                    <Badge variant="outline" className="capitalize">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant="outline" className="text-xs capitalize">
                       {habit.frequency}
                     </Badge>
                     {isLogged && (
-                      <Badge variant={log.completed ? 'default' : 'destructive'}>
+                      <Badge variant={log.completed ? 'default' : 'destructive'} className="text-xs">
                         {log.completed ? 'Completed' : 'Missed'}
                       </Badge>
                     )}
                   </div>
                 </div>
                 
-                <div className="flex gap-2 ml-4">
+                <div className="flex gap-2">
                   <Button
                     size="sm"
                     variant={isLogged && log.completed ? 'default' : 'outline'}
                     onClick={() => handleHabitLog(habit.id, true)}
                     disabled={logHabit.isPending}
+                    className="flex-1 h-8 text-xs"
                   >
                     <CheckCircle className="h-3 w-3 mr-1" />
                     Success
@@ -159,6 +160,7 @@ export const DailyHabitReview = ({ responses, onUpdate }: DailyHabitReviewProps)
                     variant={isLogged && !log.completed ? 'destructive' : 'outline'}
                     onClick={() => handleHabitLog(habit.id, false)}
                     disabled={logHabit.isPending}
+                    className="flex-1 h-8 text-xs"
                   >
                     <X className="h-3 w-3 mr-1" />
                     Failed

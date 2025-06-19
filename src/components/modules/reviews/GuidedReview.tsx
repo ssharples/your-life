@@ -44,14 +44,14 @@ export const GuidedReview = ({ reviewType, reviewId, onComplete, onCancel }: Gui
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="flex items-center justify-center min-h-[400px]"
+        className="flex items-center justify-center min-h-[200px]"
       >
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="h-8 w-8 border-4 border-blue-600 border-t-transparent rounded-full"
+          className="h-6 w-6 border-4 border-blue-600 border-t-transparent rounded-full"
         />
-        <span className="ml-3 text-gray-600">Loading your review...</span>
+        <span className="ml-3 text-sm text-gray-600">Loading your review...</span>
       </motion.div>
     );
   }
@@ -62,21 +62,21 @@ export const GuidedReview = ({ reviewType, reviewId, onComplete, onCancel }: Gui
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="text-center py-12"
+        className="text-center py-8"
       >
-        <div className="text-red-600 font-medium">Template not found</div>
+        <div className="text-red-600 font-medium text-sm">Template not found</div>
       </motion.div>
     );
   }
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8"
+      transition={{ duration: 0.4 }}
+      className="w-full max-w-2xl mx-auto px-3"
     >
-      <div className="space-y-6 sm:space-y-8">
+      <div className="space-y-4">
         <ReviewProgressHeader 
           reviewType={reviewType}
           currentStep={currentStep}

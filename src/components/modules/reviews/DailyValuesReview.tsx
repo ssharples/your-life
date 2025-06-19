@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -90,49 +89,46 @@ export const DailyValuesReview = ({ responses, onUpdate }: DailyValuesReviewProp
   if (!userValues?.length) {
     return (
       <Card>
-        <CardContent className="pt-6">
-          <div className="text-center text-muted-foreground">
-            <Heart className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No values found. Add some values first to track your progress!</p>
-          </div>
+        <CardContent className="pt-4 text-center">
+          <Heart className="h-8 w-8 mx-auto mb-3 opacity-50" />
+          <p className="text-sm">No values found. Add some values first to track your progress!</p>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Heart className="h-5 w-5 text-red-500" />
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Heart className="h-4 w-4 text-red-500" />
             Values in Action Today
           </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Select the values you actively lived out today and describe how you demonstrated them.
           </p>
-          
-          <div className="grid gap-4">
+        </CardHeader>
+        <CardContent className="space-y-3 pt-0">
+          <div className="space-y-3">
             {userValues.map((value, index) => (
               <motion.div
                 key={value.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}
-                className="border rounded-lg p-4 space-y-3"
+                className="border rounded-lg p-3 space-y-2"
               >
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-2">
                   <Checkbox
                     id={value.id}
                     checked={selectedValues.includes(value.id)}
                     onCheckedChange={(checked) => handleValueToggle(value.id, checked as boolean)}
-                    className="mt-1"
+                    className="mt-0.5"
                   />
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <label htmlFor={value.id} className="font-medium cursor-pointer">
+                  <div className="flex-1 space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <label htmlFor={value.id} className="text-sm font-medium cursor-pointer">
                         {value.value}
                       </label>
                       <Badge variant="outline" className="text-xs">
@@ -140,7 +136,7 @@ export const DailyValuesReview = ({ responses, onUpdate }: DailyValuesReviewProp
                       </Badge>
                     </div>
                     {value.description && (
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs text-muted-foreground leading-relaxed">
                         {value.description}
                       </p>
                     )}
@@ -150,12 +146,13 @@ export const DailyValuesReview = ({ responses, onUpdate }: DailyValuesReviewProp
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         transition={{ duration: 0.3 }}
+                        className="pt-2"
                       >
                         <Textarea
                           placeholder="How did you demonstrate this value today? What specific actions or decisions reflected this value?"
                           value={valueDescriptions[value.id] || ''}
                           onChange={(e) => handleDescriptionChange(value.id, e.target.value)}
-                          className="mt-2"
+                          className="text-xs"
                           rows={3}
                         />
                       </motion.div>
@@ -170,12 +167,12 @@ export const DailyValuesReview = ({ responses, onUpdate }: DailyValuesReviewProp
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="pt-4 border-t"
+              className="pt-2 border-t"
             >
               <Button 
                 onClick={handleLogValues}
                 disabled={createValueLog.isPending}
-                className="w-full"
+                className="w-full h-9 text-sm"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Log Values for Today

@@ -80,18 +80,18 @@ export const DailyTaskReview = ({ responses, onUpdate }: DailyTaskReviewProps) =
   if (!dueTasks || dueTasks.length === 0) {
     return (
       <Card>
-        <CardContent className="p-6 text-center">
-          <CheckCircle className="h-12 w-12 mx-auto text-green-500 mb-4" />
-          <p className="text-lg font-medium">No overdue tasks!</p>
-          <p className="text-muted-foreground">You're all caught up with your tasks.</p>
+        <CardContent className="p-4 text-center">
+          <CheckCircle className="h-8 w-8 mx-auto text-green-500 mb-3" />
+          <p className="text-base font-medium">No overdue tasks!</p>
+          <p className="text-sm text-muted-foreground">You're all caught up with your tasks.</p>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
+    <div className="space-y-3">
+      <p className="text-sm text-muted-foreground px-1">
         Review each task and decide what to do with it:
       </p>
       
@@ -100,23 +100,23 @@ export const DailyTaskReview = ({ responses, onUpdate }: DailyTaskReviewProps) =
         const isProcessed = !!taskResponse;
         
         return (
-          <Card key={task.id} className={isProcessed ? 'opacity-50' : ''}>
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h4 className="font-medium">{task.description}</h4>
-                  <div className="flex items-center gap-2 mt-2">
-                    <Calendar className="h-3 w-3 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">
-                      Due: {new Date(task.due_date).toLocaleDateString()}
-                    </span>
-                    <Badge variant={task.priority <= 2 ? 'destructive' : task.priority <= 3 ? 'default' : 'secondary'}>
+          <Card key={task.id} className={`${isProcessed ? 'opacity-50' : ''} mx-1`}>
+            <CardContent className="p-3">
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <h4 className="font-medium text-sm leading-tight">{task.description}</h4>
+                  <div className="flex flex-wrap items-center gap-2 text-xs">
+                    <div className="flex items-center gap-1 text-muted-foreground">
+                      <Calendar className="h-3 w-3" />
+                      <span>Due: {new Date(task.due_date).toLocaleDateString()}</span>
+                    </div>
+                    <Badge variant={task.priority <= 2 ? 'destructive' : task.priority <= 3 ? 'default' : 'secondary'} className="text-xs">
                       Priority {task.priority}
                     </Badge>
                   </div>
                   
                   {taskResponse && (
-                    <Badge variant="outline" className="mt-2">
+                    <Badge variant="outline" className="text-xs">
                       {taskResponse.action === 'complete' && 'Completed'}
                       {taskResponse.action === 'reschedule' && `Rescheduled to ${taskResponse.newDate}`}
                       {taskResponse.action === 'delete' && 'Cancelled'}
@@ -125,11 +125,11 @@ export const DailyTaskReview = ({ responses, onUpdate }: DailyTaskReviewProps) =
                 </div>
                 
                 {!isProcessed && (
-                  <div className="flex flex-col gap-2 ml-4">
+                  <div className="space-y-2">
                     <Button
                       size="sm"
                       onClick={() => handleTaskAction(task.id, 'complete')}
-                      className="w-full"
+                      className="w-full h-8 text-xs"
                     >
                       <CheckCircle className="h-3 w-3 mr-1" />
                       Complete
@@ -140,13 +140,15 @@ export const DailyTaskReview = ({ responses, onUpdate }: DailyTaskReviewProps) =
                         type="date"
                         value={newDueDate[task.id] || ''}
                         onChange={(e) => setNewDueDate(prev => ({ ...prev, [task.id]: e.target.value }))}
-                        className="text-xs"
+                        className="text-xs h-8 flex-1"
+                        placeholder="New date"
                       />
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => handleTaskAction(task.id, 'reschedule')}
                         disabled={!newDueDate[task.id]}
+                        className="h-8 px-2"
                       >
                         <Clock className="h-3 w-3" />
                       </Button>
@@ -156,9 +158,10 @@ export const DailyTaskReview = ({ responses, onUpdate }: DailyTaskReviewProps) =
                       size="sm"
                       variant="destructive"
                       onClick={() => handleTaskAction(task.id, 'delete')}
+                      className="w-full h-8 text-xs"
                     >
                       <Trash2 className="h-3 w-3 mr-1" />
-                      Cancel
+                      Cancel Task
                     </Button>
                   </div>
                 )}
