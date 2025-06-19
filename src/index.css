@@ -118,13 +118,31 @@
   input[type="password"], 
   textarea {
     -webkit-appearance: none;
-    border-radius: 8px;
+    border-radius: 16px;
   }
 
   /* Better touch targets for iOS */
   .touch-target {
     min-height: 44px;
     min-width: 44px;
+  }
+
+  /* Prevent overlapping elements */
+  .space-y-4 > * + * {
+    margin-top: 1rem !important;
+  }
+
+  .space-y-2 > * + * {
+    margin-top: 0.5rem !important;
+  }
+
+  /* Ensure proper spacing for button groups */
+  .flex.gap-2 {
+    gap: 0.75rem;
+  }
+
+  .flex.space-x-2 > * + * {
+    margin-left: 0.75rem !important;
   }
 }
 
@@ -139,14 +157,31 @@
   }
 
   .ios-card {
-    @apply bg-white rounded-2xl shadow-sm border border-gray-100;
+    @apply bg-white rounded-2xl shadow-lg border border-gray-100;
   }
 
   .ios-button {
-    @apply bg-blue-500 text-white font-medium py-3 px-6 rounded-xl shadow-sm active:scale-95 transition-transform duration-150;
+    @apply bg-blue-500 text-white font-medium py-4 px-6 rounded-2xl shadow-lg active:scale-95 transition-all duration-150 w-full sm:w-auto min-h-[48px];
   }
 
   .ios-secondary-button {
-    @apply bg-gray-100 text-gray-900 font-medium py-3 px-6 rounded-xl active:scale-95 transition-transform duration-150;
+    @apply bg-gray-100 text-gray-900 font-medium py-4 px-6 rounded-2xl shadow-lg active:scale-95 transition-all duration-150 w-full sm:w-auto min-h-[48px];
+  }
+
+  /* Mobile-first button spacing */
+  @media (max-width: 640px) {
+    .button-group {
+      @apply flex flex-col space-y-3 w-full;
+    }
+    
+    .button-group > * {
+      @apply w-full;
+    }
+  }
+
+  @media (min-width: 641px) {
+    .button-group {
+      @apply flex flex-row space-x-3 space-y-0;
+    }
   }
 }
