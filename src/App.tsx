@@ -7,6 +7,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { initializeNotifications } from "@/utils/notificationScheduler";
+import { supabase } from "@/integrations/supabase/client";
+import { encryption } from "@/utils/encryption";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -16,6 +18,16 @@ function App() {
   React.useEffect(() => {
     // Initialize notifications when app loads
     initializeNotifications();
+
+    // Set up auth state change listener to handle encryption keys
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') {
+        // Clear encryption key on logout for security
+        encryption.clearKey();
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   return (
