@@ -77,6 +77,7 @@ export const TaskInput = ({ onSubmit, goals = [], projects = [] }: TaskInputProp
         if (match) {
           foundDate = pattern.date(match);
           cleanText = text.replace(match[0], '').trim();
+          pattern.regex.lastIndex = 0; // Reset regex state
           break;
         }
       }
