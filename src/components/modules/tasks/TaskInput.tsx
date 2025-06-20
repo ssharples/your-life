@@ -81,16 +81,17 @@ export const TaskInput = ({ onSubmit, goals = [], projects = [] }: TaskInputProp
 
     for (const pattern of patterns) {
       if (pattern.regex.global) {
+        pattern.regex.lastIndex = 0; // Reset regex state
         const match = pattern.regex.exec(text);
         if (match) {
           foundDate = pattern.handler(match);
           cleanText = text.replace(match[0], '').trim();
-          pattern.regex.lastIndex = 0; // Reset regex state
           break;
         }
       } else {
-        if (pattern.regex.test(text)) {
-          foundDate = pattern.handler();
+        const match = text.match(pattern.regex);
+        if (match) {
+          foundDate = pattern.handler(match);
           cleanText = text.replace(pattern.regex, '').trim();
           break;
         }

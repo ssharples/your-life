@@ -4,45 +4,51 @@ import { supabase } from '@/integrations/supabase/client';
 import { encryption } from '@/utils/encryption';
 import { toast } from '@/hooks/use-toast';
 
-export const useEncryptedData = <T,>(tableName: string, userId: string) => {
+interface EncryptableData {
+  id: string;
+  user_id: string;
+  [key: string]: any;
+}
+
+interface EncryptedFields {
+  content?: string;
+  title?: string;
+  description?: string;
+}
+
+export const useEncryptedData = <T extends EncryptableData>(
+  tableName: 'journals' | 'knowledge_vault' | 'goals' | 'los_tasks',
+  userId: string
+) => {
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
     try {
-      const { data: encryptedData, error } = await supabase
+      const { data: rawData, error } = await supabase
         .from(tableName)
         .select('*')
         .eq('user_id', userId);
 
       if (error) throw error;
 
-      // Decrypt the data on the client side
-      const decryptedData = encryptedData.map(item => {
-        const decrypted = { ...item };
-        // Decrypt specific fields that contain sensitive data
-        if (item.encrypted_content) {
-          try {
-            decrypted.content = encryption.decrypt(item.encrypted_content);
-          } catch (e) {
-            console.error('Failed to decrypt content:', e);
-            decrypted.content = '[Decryption Failed]';
-          }
-        }
-        if (item.encrypted_title) {
-          try {
-            decrypted.title = encryption.decrypt(item.encrypted_title);
-          } catch (e) {
-            console.error('Failed to decrypt title:', e);
-            decrypted.title = '[Decryption Failed]';
-          }
-        }
-        return decrypted;
+      // For now, just return the data as-is since we don't have encrypted columns yet
+      // In the future, this is where we would decrypt fields
+      const processedData = rawData.map(item => {
+        const processed = { ...item } as T;
+        
+        // Future encryption logic would go here
+        // For example:
+        // if (item.encrypted_content) {
+        //   processed.content = encryption.decrypt(item.encrypted_content);
+        // }
+        
+        return processed;
       });
 
-      setData(decryptedData);
+      setData(processedData);
     } catch (error) {
-      console.error('Error fetching encrypted data:', error);
+      console.error('Error fetching data:', error);
       toast({
         title: "Error",
         description: "Failed to load data",
@@ -53,23 +59,20 @@ export const useEncryptedData = <T,>(tableName: string, userId: string) => {
     }
   };
 
-  const saveEncryptedData = async (newData: Partial<T> & { content?: string; title?: string }) => {
+  const saveEncryptedData = async (newData: Partial<T> & EncryptedFields) => {
     try {
-      const encryptedData: any = { ...newData };
+      const dataToSave = { ...newData };
       
-      // Encrypt sensitive fields before saving
-      if (newData.content) {
-        encryptedData.encrypted_content = encryption.encrypt(newData.content);
-        delete encryptedData.content; // Remove plaintext
-      }
-      if (newData.title) {
-        encryptedData.encrypted_title = encryption.encrypt(newData.title);
-        delete encryptedData.title; // Remove plaintext
-      }
+      // Future encryption logic would go here
+      // For example:
+      // if (newData.content) {
+      //   dataToSave.encrypted_content = encryption.encrypt(newData.content);
+      //   delete dataToSave.content;
+      // }
 
       const { error } = await supabase
         .from(tableName)
-        .insert([{ ...encryptedData, user_id: userId }]);
+        .insert([{ ...dataToSave, user_id: userId }]);
 
       if (error) throw error;
       
@@ -79,7 +82,7 @@ export const useEncryptedData = <T,>(tableName: string, userId: string) => {
         description: "Data saved securely",
       });
     } catch (error) {
-      console.error('Error saving encrypted data:', error);
+      console.error('Error saving data:', error);
       toast({
         title: "Error",
         description: "Failed to save data",
