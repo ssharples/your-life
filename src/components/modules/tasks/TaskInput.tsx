@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,47 +36,62 @@ export const TaskInput = ({ onSubmit, goals = [], projects = [] }: TaskInputProp
   const parseNaturalDate = (text: string) => {
     const today = new Date();
     const patterns = [
-      { regex: /\btoday\b/i, date: () => format(today, 'yyyy-MM-dd') },
-      { regex: /\btomorrow\b/i, date: () => {
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        return format(tomorrow, 'yyyy-MM-dd');
-      }},
-      { regex: /\bnext week\b/i, date: () => {
-        const nextWeek = new Date(today);
-        nextWeek.setDate(nextWeek.getDate() + 7);
-        return format(nextWeek, 'yyyy-MM-dd');
-      }},
-      { regex: /(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/g, date: (match: RegExpMatchArray) => {
-        const month = parseInt(match[1]) - 1;
-        const day = parseInt(match[2]);
-        const year = match[3] ? parseInt(match[3]) : today.getFullYear();
-        const fullYear = year < 100 ? 2000 + year : year;
-        const date = new Date(fullYear, month, day);
-        return isValid(date) ? format(date, 'yyyy-MM-dd') : '';
-      }},
-      { regex: /(\d{4})-(\d{1,2})-(\d{1,2})/g, date: (match: RegExpMatchArray) => {
-        const date = new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]));
-        return isValid(date) ? format(date, 'yyyy-MM-dd') : '';
-      }}
+      { 
+        regex: /\btoday\b/i, 
+        handler: () => format(today, 'yyyy-MM-dd')
+      },
+      { 
+        regex: /\btomorrow\b/i, 
+        handler: () => {
+          const tomorrow = new Date(today);
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          return format(tomorrow, 'yyyy-MM-dd');
+        }
+      },
+      { 
+        regex: /\bnext week\b/i, 
+        handler: () => {
+          const nextWeek = new Date(today);
+          nextWeek.setDate(nextWeek.getDate() + 7);
+          return format(nextWeek, 'yyyy-MM-dd');
+        }
+      },
+      { 
+        regex: /(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/g, 
+        handler: (match: RegExpMatchArray) => {
+          const month = parseInt(match[1]) - 1;
+          const day = parseInt(match[2]);
+          const year = match[3] ? parseInt(match[3]) : today.getFullYear();
+          const fullYear = year < 100 ? 2000 + year : year;
+          const date = new Date(fullYear, month, day);
+          return isValid(date) ? format(date, 'yyyy-MM-dd') : '';
+        }
+      },
+      { 
+        regex: /(\d{4})-(\d{1,2})-(\d{1,2})/g, 
+        handler: (match: RegExpMatchArray) => {
+          const date = new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]));
+          return isValid(date) ? format(date, 'yyyy-MM-dd') : '';
+        }
+      }
     ];
 
     let cleanText = text;
     let foundDate = '';
 
     for (const pattern of patterns) {
-      if (typeof pattern.date === 'function' && !pattern.regex.global) {
-        if (pattern.regex.test(text)) {
-          foundDate = pattern.date();
-          cleanText = text.replace(pattern.regex, '').trim();
+      if (pattern.regex.global) {
+        const match = pattern.regex.exec(text);
+        if (match) {
+          foundDate = pattern.handler(match);
+          cleanText = text.replace(match[0], '').trim();
+          pattern.regex.lastIndex = 0; // Reset regex state
           break;
         }
       } else {
-        const match = pattern.regex.exec(text);
-        if (match) {
-          foundDate = pattern.date(match);
-          cleanText = text.replace(match[0], '').trim();
-          pattern.regex.lastIndex = 0; // Reset regex state
+        if (pattern.regex.test(text)) {
+          foundDate = pattern.handler();
+          cleanText = text.replace(pattern.regex, '').trim();
           break;
         }
       }
