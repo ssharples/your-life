@@ -44,6 +44,14 @@ export const PillarDashboard = ({
   const [showHabitForm, setShowHabitForm] = useState(false);
   const [showKnowledgeForm, setShowKnowledgeForm] = useState(false);
 
+  // Goal form state
+  const [goalTitle, setGoalTitle] = useState('');
+  const [goalDescription, setGoalDescription] = useState('');
+  const [goalType, setGoalType] = useState<'short-term' | 'long-term'>('short-term');
+  const [goalTargetDate, setGoalTargetDate] = useState('');
+  const [goalPriority, setGoalPriority] = useState(3);
+  const [goalPillarId, setGoalPillarId] = useState(pillar.id);
+
   // Calculate energy days for current month
   const currentMonth = new Date();
   const energyDaysThisMonth = energyLogs.filter(log => {
@@ -51,6 +59,25 @@ export const PillarDashboard = ({
     return logDate.getMonth() === currentMonth.getMonth() && 
            logDate.getFullYear() === currentMonth.getFullYear();
   }).length;
+
+  const handleGoalSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle goal creation logic here
+    console.log('Creating goal with pillar:', goalPillarId);
+    setShowGoalForm(false);
+    onRefresh();
+  };
+
+  const handleHabitSubmit = (data: any) => {
+    // Handle habit creation logic here
+    console.log('Creating habit for pillar:', pillar.id);
+    setShowHabitForm(false);
+    onRefresh();
+  };
+
+  const handleHabitCancel = () => {
+    setShowHabitForm(false);
+  };
 
   return (
     <div className="space-y-6">
@@ -176,11 +203,20 @@ export const PillarDashboard = ({
                   <DialogTitle>Add New Goal</DialogTitle>
                 </DialogHeader>
                 <GoalForm 
-                  defaultPillarId={pillar.id}
-                  onSuccess={() => {
-                    setShowGoalForm(false);
-                    onRefresh();
-                  }}
+                  title={goalTitle}
+                  setTitle={setGoalTitle}
+                  description={goalDescription}
+                  setDescription={setGoalDescription}
+                  type={goalType}
+                  setType={setGoalType}
+                  targetDate={goalTargetDate}
+                  setTargetDate={setGoalTargetDate}
+                  priority={goalPriority}
+                  setPriority={setGoalPriority}
+                  pillarId={goalPillarId}
+                  setPillarId={setGoalPillarId}
+                  onSubmit={handleGoalSubmit}
+                  isEditing={false}
                 />
               </DialogContent>
             </Dialog>
@@ -277,10 +313,8 @@ export const PillarDashboard = ({
                   <DialogTitle>Add New Habit</DialogTitle>
                 </DialogHeader>
                 <HabitForm 
-                  onSuccess={() => {
-                    setShowHabitForm(false);
-                    onRefresh();
-                  }}
+                  onSubmit={handleHabitSubmit}
+                  onCancel={handleHabitCancel}
                 />
               </DialogContent>
             </Dialog>
