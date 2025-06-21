@@ -99,7 +99,16 @@ export const useReviewData = ({ reviewType, reviewId, onComplete }: UseReviewDat
       }
 
       // If this is a daily review and pillars are selected, create energy logs
-      if (reviewType === 'daily' && responses.pillars && Array.isArray(responses.pillars)) {
+      if (reviewType === 'daily' && responses.pillars && Array.isArray(responses.pillars) && responses.pillars.length > 0) {
+        // First, delete ALL existing logs for this user, date, and pillars to prevent duplicates
+        await supabase
+          .from('pillar_energy_logs')
+          .delete()
+          .eq('user_id', user.data.user.id)
+          .eq('date', today)
+          .in('pillar_id', responses.pillars);
+
+        // Then insert new logs
         const energyLogs = responses.pillars.map((pillarId: string) => ({
           user_id: user.data.user.id,
           pillar_id: pillarId,
@@ -107,22 +116,13 @@ export const useReviewData = ({ reviewType, reviewId, onComplete }: UseReviewDat
           date: today
         }));
 
-        if (energyLogs.length > 0) {
-          // First, delete existing logs for this review to avoid duplicates
-          await supabase
-            .from('pillar_energy_logs')
-            .delete()
-            .eq('review_id', reviewData.id);
+        const { error: logsError } = await supabase
+          .from('pillar_energy_logs')
+          .insert(energyLogs);
 
-          // Then insert new logs
-          const { error: logsError } = await supabase
-            .from('pillar_energy_logs')
-            .insert(energyLogs);
-
-          if (logsError) {
-            console.error('Error saving pillar energy logs:', logsError);
-            // Don't throw here as the review itself was saved successfully
-          }
+        if (logsError) {
+          console.error('Error saving pillar energy logs:', logsError);
+          // Don't throw here as the review itself was saved successfully
         }
       }
 
@@ -130,6 +130,7 @@ export const useReviewData = ({ reviewType, reviewId, onComplete }: UseReviewDat
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reviews'] });
+      queryClient.invalidateQueries({ queryKey: ['pillar-dashboard'] });
     },
   });
 
