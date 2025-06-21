@@ -1271,6 +1271,48 @@ export type Database = {
         }
         Relationships: []
       }
+      pillar_energy_logs: {
+        Row: {
+          created_at: string | null
+          date: string
+          id: string
+          pillar_id: string
+          review_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          id?: string
+          pillar_id: string
+          review_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          id?: string
+          pillar_id?: string
+          review_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pillar_energy_logs_pillar_id_fkey"
+            columns: ["pillar_id"]
+            isOneToOne: false
+            referencedRelation: "pillars"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pillar_energy_logs_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pillars: {
         Row: {
           created_at: string
@@ -1490,6 +1532,7 @@ export type Database = {
           reflections: string | null
           review_step: number | null
           review_type: string
+          selected_pillars: string[] | null
           summary: string | null
           template_responses: Json | null
           updated_at: string
@@ -1505,6 +1548,7 @@ export type Database = {
           reflections?: string | null
           review_step?: number | null
           review_type: string
+          selected_pillars?: string[] | null
           summary?: string | null
           template_responses?: Json | null
           updated_at?: string
@@ -1520,6 +1564,7 @@ export type Database = {
           reflections?: string | null
           review_step?: number | null
           review_type?: string
+          selected_pillars?: string[] | null
           summary?: string | null
           template_responses?: Json | null
           updated_at?: string

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { DailyTaskReview } from '../DailyTaskReview';
 import { DailyHabitReview } from '../DailyHabitReview';
 import { DailyValuesReview } from '../DailyValuesReview';
+import { DailyPillarReview } from '../DailyPillarReview';
 import { NewTaskCreator } from './NewTaskCreator';
 import { useState } from 'react';
 
@@ -137,8 +138,22 @@ export const ReviewStepContent = ({
               </motion.div>
             )}
 
-            {/* Task creation for step 4 of daily review */}
+            {/* Pillar energy review for step 4 of daily review */}
             {reviewType === 'daily' && currentStep === 4 && (
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+              >
+                <DailyPillarReview 
+                  responses={responses.pillars || []}
+                  onUpdate={(pillars) => onUpdateResponse('pillars', pillars)}
+                />
+              </motion.div>
+            )}
+
+            {/* Task creation for step 5 of daily review */}
+            {reviewType === 'daily' && currentStep === 5 && (
               <motion.div
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -153,7 +168,7 @@ export const ReviewStepContent = ({
             )}
 
             {/* Standard prompts for all other steps */}
-            {(reviewType !== 'daily' || (currentStep !== 1 && currentStep !== 2 && currentStep !== 3)) && (
+            {(reviewType !== 'daily' || (currentStep !== 1 && currentStep !== 2 && currentStep !== 3 && currentStep !== 4 && currentStep !== 5)) && (
               <div className="space-y-4">
                 {prompts.map((prompt: string, index: number) => (
                   <motion.div

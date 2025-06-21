@@ -50,7 +50,7 @@ export const useReviewData = ({ reviewType, reviewId, onComplete }: UseReviewDat
       setCurrentStep(existingReview.review_step || 1);
       // Safely handle the Json type from Supabase
       const templateResponses = existingReview.template_responses;
-      if (templateResponses && typeof templateResponses === 'object' && !Array.isArray(templateResponses)) {
+      if (templateResponses && typeof templateResponses === 'object'&& !Array.isArray(templateResponses)) {
         setResponses(templateResponses as Record<string, any>);
       }
     }
@@ -61,34 +61,72 @@ export const useReviewData = ({ reviewType, reviewId, onComplete }: UseReviewDat
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('Not authenticated');
 
+      let reviewData;
+      const today = new Date().toISOString().split('T')[0];
+
       if (reviewId) {
-        const { error } = await supabase
+        const { data: updatedReview, error } = await supabase
           .from('reviews')
           .update({
             template_responses: responses,
             review_step: currentStep,
             is_completed: data.isCompleted || false,
+            selected_pillars: responses.pillars || []
           })
-          .eq('id', reviewId);
+          .eq('id', reviewId)
+          .select()
+          .single();
         
         if (error) throw error;
+        reviewData = updatedReview;
       } else {
         const { data: newReview, error } = await supabase
           .from('reviews')
           .insert([{
             user_id: user.data.user.id,
             review_type: reviewType,
-            date: new Date().toISOString().split('T')[0],
+            date: today,
             template_responses: responses,
             review_step: currentStep,
             is_completed: data.isCompleted || false,
+            selected_pillars: responses.pillars || []
           }])
           .select()
           .single();
         
         if (error) throw error;
-        return newReview;
+        reviewData = newReview;
       }
+
+      // If this is a daily review and pillars are selected, create energy logs
+      if (reviewType === 'daily' && responses.pillars && Array.isArray(responses.pillars)) {
+        const energyLogs = responses.pillars.map((pillarId: string) => ({
+          user_id: user.data.user.id,
+          pillar_id: pillarId,
+          review_id: reviewData.id,
+          date: today
+        }));
+
+        if (energyLogs.length > 0) {
+          // First, delete existing logs for this review to avoid duplicates
+          await supabase
+            .from('pillar_energy_logs')
+            .delete()
+            .eq('review_id', reviewData.id);
+
+          // Then insert new logs
+          const { error: logsError } = await supabase
+            .from('pillar_energy_logs')
+            .insert(energyLogs);
+
+          if (logsError) {
+            console.error('Error saving pillar energy logs:', logsError);
+            // Don't throw here as the review itself was saved successfully
+          }
+        }
+      }
+
+      return reviewData;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reviews'] });
