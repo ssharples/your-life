@@ -35,7 +35,7 @@ export const useEncryptedData = <T extends EncryptableData>(
       // For now, just return the data as-is since we don't have encrypted columns yet
       // In the future, this is where we would decrypt fields
       const processedData = rawData.map(item => {
-        const processed = { ...item } as T;
+        const processed = { ...item } as unknown as T;
         
         // Future encryption logic would go here
         // For example:
@@ -72,7 +72,7 @@ export const useEncryptedData = <T extends EncryptableData>(
 
       const { error } = await supabase
         .from(tableName)
-        .insert([{ ...dataToSave, user_id: userId }]);
+        .insert([{ ...dataToSave, user_id: userId } as any]);
 
       if (error) throw error;
       
